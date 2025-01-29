@@ -10,6 +10,7 @@ CLIENT_ID = ""
 CLIENT_SECRET = ""
 ASSET_GROUP_ID = 103 # asset group id for classrooms
 
+### payload data
 data = {
     "client_id": CLIENT_ID,
     "client_secret": CLIENT_SECRET,
@@ -17,6 +18,7 @@ data = {
     "scope": "read:assets edit:assets"
 }
 
+### map for Calvin Building Codes (not the full list of what's on campus--just what is in Halo)
 building_codes = {
     "Arena Complex Classrooms": "HC",
     "CFAC Classrooms": "CF",
@@ -51,15 +53,20 @@ def getClassroomAssets(token):
     """
 
     try:
-        if len(token) > 0:
+        if len(token) > 0:  # check if the token is empty
+
+            # Header Authentication
             headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+            # query to get all Classroom Assets from Halo
             query = "?assetgroup_id={}".format(ASSET_GROUP_ID)
 
+            # GET API Call for Classroom Assets
             response = requests.get(url=asset_URL+query, headers=headers)
             asset_count = response.json()["record_count"]
             classroom_json = response.json()["assets"]
 
-            if asset_count != 0:
+            if asset_count != 0:   # check so that we don't have to waste operation time
                 return classroom_json
             else:
                 return("No Classrooms in the Database")
@@ -76,6 +83,7 @@ def getClassRoomsCondensed(token):
             modi_classes: dict
     """
 
+    ### map for Classroom Assets by their Building Code -- aka Final Result
     modi_classes = {
         "Arena Complex Classrooms": [],
         "CFAC Classrooms": [],
@@ -91,14 +99,20 @@ def getClassRoomsCondensed(token):
     }
 
     try:
-        if len(token) > 0:
+        if len(token) > 0:  # check if the token is empty
+
+            # Header Authentication
             headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
+
+            # query to get all Classroom Assets from Halo
             query = "?assetgroup_id={}".format(ASSET_GROUP_ID)
 
+            # GET API Call for Classroom Assets
             response = requests.get(url=asset_URL+query, headers=headers)
             asset_count = response.json()["record_count"]
             classroom_json = response.json()["assets"]
 
+            ### Fills modi_classes dictionary according to building_codes map above
             for classroom in classroom_json:
                 halo_building_name = classroom["assettype_name"]
                 room_name = classroom["inventory_number"]
