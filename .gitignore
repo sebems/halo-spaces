@@ -1,0 +1,11 @@
+# Data
+logs/
+stores/
+data/
+
+# Packaging
+venv/
+__pycache__/
+
+# Misc
+.DS_Store
