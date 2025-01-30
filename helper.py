@@ -1,4 +1,5 @@
 import requests
+import json
 
 ### API CALL for Token
 
@@ -41,6 +42,30 @@ def getToken():
     """
     response = requests.post(auth_URL, data=data)
     return response.json()["access_token"] if response.ok else ""
+
+
+def getClassByID(token, id):
+    try:
+        if len(token) > 0:  # check if the token is empty
+
+            # Header Authentication
+            headers = {
+                "Authorization": f"Bearer {token}",
+                "Content-Type": "application/json",
+            }
+
+            # query to get all Classroom Assets from Halo
+            query = f"/{id}?includediagramdetails=True&includedetails={True}"
+
+            # GET API Call for Classroom Assets
+            response = requests.get(url=asset_URL + query, headers=headers)
+
+            assets_resp = response.json()
+            return assets_resp if len(assets_resp) > 0 else []
+        else:
+            raise Exception
+    except Exception as err:
+        print(err, "Token is empty")
 
 
 def getClassroomAssets(token):
@@ -123,10 +148,11 @@ def getClassRoomsCondensed(token):
                 halo_building_name = classroom["assettype_name"]
                 room_name = classroom["inventory_number"]
                 room_id = classroom["id"]
+                notes = classroom["notes"]
                 building_code = building_codes[halo_building_name]
 
                 modi_classes[halo_building_name].append(
-                    [room_id, building_code, room_name]
+                    [room_id, building_code, room_name, notes]
                 )
 
             if asset_count != 0:
@@ -137,3 +163,8 @@ def getClassRoomsCondensed(token):
             raise Exception
     except Exception as err:
         print(err, "Token is empty")
+
+
+# asset_test = getClassByID(getToken(), "4814")
+# with open("./test.json", "w+") as file:
+#     json.dump(asset_test, file)
