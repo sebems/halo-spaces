@@ -43,8 +43,7 @@ def getToken():
     response = requests.post(auth_URL, data=data)
     return response.json()["access_token"] if response.ok else ""
 
-
-def getClassByID(token, id):
+def getClassDetails(token, id):
     try:
         if len(token) > 0:  # check if the token is empty
 
@@ -68,7 +67,7 @@ def getClassByID(token, id):
         print(err, "Token is empty")
 
 
-def getClassroomAssets(token):
+def getClassrooms(token):
     """
     Gets the list of Classrooms from Halo in Dictionary variable
 
@@ -136,7 +135,7 @@ def getClassRoomsCondensed(token):
             }
 
             # query to get all Classroom Assets from Halo
-            query = "?assetgroup_id={}".format(ASSET_GROUP_ID)
+            query = f"?assetgroup_id={ASSET_GROUP_ID}"
 
             # GET API Call for Classroom Assets
             response = requests.get(url=asset_URL + query, headers=headers)
@@ -148,11 +147,16 @@ def getClassRoomsCondensed(token):
                 halo_building_name = classroom["assettype_name"]
                 room_name = classroom["inventory_number"]
                 room_id = classroom["id"]
-                notes = classroom["notes"]
+
                 building_code = building_codes[halo_building_name]
 
+                # TODO: fields to add to halo classroom assets
+                # room assets
+                # room capacity
+                # crestron availability
+
                 modi_classes[halo_building_name].append(
-                    [room_id, building_code, room_name, notes]
+                    [room_name, []]
                 )
 
             if asset_count != 0:
@@ -164,7 +168,7 @@ def getClassRoomsCondensed(token):
     except Exception as err:
         print(err, "Token is empty")
 
-
+### TESTING JSON STRUCTURE
 # asset_test = getClassByID(getToken(), "4814")
 # with open("./test.json", "w+") as file:
 #     json.dump(asset_test, file)
