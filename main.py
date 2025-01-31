@@ -1,62 +1,81 @@
 import streamlit as st
 import pandas as pd
+from datetime import date
 from helper import getToken, getClassRoomsCondensed
 
 TOKEN = getToken()
-HEADERS = ["Room ID", "Building Code", "Room Name"]
+HEADERS = ["Room Name", "Room Assets"]
 
 st.header("Spaces Assets [Draft]")
 
-# TODO: setup page navigation
+st.divider()
+
+table_col, details_col = st.columns(2)
+
+def createClassExpander(room_name: str, room_cap: int, isCrestronAvailable: bool):
+    """
+    Creates an Expander for each space
+    """
+    a_expander = st.expander(room_name)
+
+    a_expander.image("./images/seminar.png", width=100)
+    a_expander.divider()
+
+    col1, col2 = a_expander.columns(2)
+    col1.markdown(f'''#### {room_name}''')
+    col2.metric(label="Room Capacity", value=room_cap)
+
+    icon = '✅' if isCrestronAvailable else '❌'
+
+    a_expander.info("Crestron Panel Available", icon=icon)
+
 class_dict = getClassRoomsCondensed(TOKEN)
 
-# column config for data frame
-config = {"Room ID": st.column_config.TextColumn()}
+# SIDEBAR SECTION
+sidebar = st.sidebar
+sidebar.text_input("Search")
+sidebar.button("Submit")
 
-building_options = st.selectbox(
-    "Filter Buildings",
-    (
-        "Arena Complex",
-        "CFAC",
-        "Chapel",
-        "Commons Annex",
-        "DeVos",
-        "DeVries Hall",
-        "Engineering Building",
-        "Hiemenga Hall",
-        "North Hall",
-        "Science Building",
-        "Spoelhof University Center",
-    ),
-)
+with sidebar:
+    building_options = st.selectbox(
+            "Filter Buildings",
+            (
+                "Arena Complex",
+                "CFAC",
+                "Chapel",
+                "Commons Annex",
+                "DeVos",
+                "DeVries Hall",
+                "Engineering Building",
+                "Hiemenga Hall",
+                "North Hall",
+                "Science Building",
+                "Spoelhof University Center",
+            ),
+        )
 
-building_choice = f"{building_options}" + " Classrooms"
+sidebar.slider("Room Capacity Minimum", 10, 200, 10)
 
-if building_options != None:
-    arena_rooms = class_dict[building_choice]
-    class_df = pd.DataFrame(arena_rooms, columns=HEADERS)
+with table_col:
+    building_choice = f"{building_options}" + " Classrooms"
 
-    st.dataframe(class_df, column_config=config, use_container_width=True)
-else:
-    st.dataframe(pd.DataFrame())
+    if building_options != None and len(class_dict) > 0:
+        building_rooms = class_dict[building_choice]    # gets the building choice
 
-expander = st.expander("Test Classroom")
+        # MAIN DATAFRAME OF SPACES ON CAMPUSs
+        class_df = pd.DataFrame(building_rooms, columns=HEADERS)
 
-expander.image("./images/seminar.png", width=100)
-expander.divider()
+        st.dataframe(class_df, use_container_width=True, hide_index=True)    # display dataframe
+    else:
+        st.dataframe(pd.DataFrame())
 
-col1, col2, col3 = expander.columns(3)
-col1.metric(label="Room Capacity", value=100)
-col2.metric(label="Room Capacity", value=100)
-col3.metric(label="Room Capacity", value=100)
-expander.info("Crestron Panel Available", icon="✅")
+with details_col:
+    for room in class_df["Room Name"].tolist():
+        # apart from the room_name param, the rest are dummy values waiting for change in Halo
+        createClassExpander(room, 100, True)
 
-# TODO: make the classroom assets displayable via model components or cards
+    # TODO: get classroom details
 
-# TODO: add filter mechanic
+    # TODO: link classroom assets to images | need to host images in a different repo
 
-# TODO: add search bar
-
-# TODO: link classroom assets to images
-
-# TODO: link classrooms to their respective assets
+    # TODO: link classrooms to their respective assets
