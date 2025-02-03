@@ -1,16 +1,16 @@
 import streamlit as st
 import pandas as pd
-from datetime import date
 from helper import getToken, getClassRoomsCondensed
 
 TOKEN = getToken()
-HEADERS = ["Room Name", "Room Assets"]
+HEADERS = ["Room Name", "Room Capacity"]
 
 st.header("Spaces Assets [Draft]")
 
 st.divider()
 
 table_col, details_col = st.columns(2)
+
 
 def createClassExpander(room_name: str, room_cap: int, isCrestronAvailable: bool):
     """
@@ -22,57 +22,70 @@ def createClassExpander(room_name: str, room_cap: int, isCrestronAvailable: bool
     a_expander.divider()
 
     col1, col2 = a_expander.columns(2)
-    col1.markdown(f'''#### {room_name}''')
+    col1.markdown(f"""#### {room_name}""")
     col2.metric(label="Room Capacity", value=room_cap)
 
-    icon = '✅' if isCrestronAvailable else '❌'
+    icon = "✅" if isCrestronAvailable else "❌"
 
     a_expander.info("Crestron Panel Available", icon=icon)
+
 
 class_dict = getClassRoomsCondensed(TOKEN)
 
 # SIDEBAR SECTION
 sidebar = st.sidebar
-sidebar.text_input("Search")
-sidebar.button("Submit")
+
 
 with sidebar:
+    search = st.text_input("Search")
+    submit = st.button("Submit", on_click=print(search))
     building_options = st.selectbox(
-            "Filter Buildings",
-            (
-                "Arena Complex",
-                "CFAC",
-                "Chapel",
-                "Commons Annex",
-                "DeVos",
-                "DeVries Hall",
-                "Engineering Building",
-                "Hiemenga Hall",
-                "North Hall",
-                "Science Building",
-                "Spoelhof University Center",
-            ),
-        )
+        "Filter Buildings",
+        (
+            "Arena Complex",
+            "CFAC",
+            "Chapel",
+            "Commons Annex",
+            "DeVos",
+            "DeVries Hall",
+            "Engineering Building",
+            "Hiemenga Hall",
+            "North Hall",
+            "Science Building",
+            "Spoelhof University Center",
+        ),
+    )
 
-sidebar.slider("Room Capacity Minimum", 10, 200, 10)
+capacity_filter = sidebar.slider("Room Capacity", 10, 200, (20, 50))
 
 with table_col:
     building_choice = f"{building_options}" + " Classrooms"
 
     if building_options != None and len(class_dict) > 0:
-        building_rooms = class_dict[building_choice]    # gets the building choice
+        building_rooms = class_dict[building_choice]  # gets the building choice
 
         # MAIN DATAFRAME OF SPACES ON CAMPUSs
         class_df = pd.DataFrame(building_rooms, columns=HEADERS)
 
-        st.dataframe(class_df, use_container_width=True, hide_index=True)    # display dataframe
+        if search != "":
+            class_df = class_df[class_df["Room Name"] == search]
+
+        class_df = class_df[
+            class_df["Room Capacity"] >= min(capacity_filter)
+        ]  # add room capacity filter
+
+        st.dataframe(
+            class_df, use_container_width=True, hide_index=True
+        )  # display dataframe
     else:
         st.dataframe(pd.DataFrame())
 
 with details_col:
-    for room in class_df["Room Name"].tolist():
+    for room, capacity in zip(
+        class_df["Room Name"].tolist(), class_df["Room Capacity"].tolist()
+    ):
         # apart from the room_name param, the rest are dummy values waiting for change in Halo
-        createClassExpander(room, 100, True)
+        createClassExpander(room, capacity, True)
 
     # TODO: get classroom details
 

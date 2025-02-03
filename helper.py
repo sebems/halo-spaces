@@ -1,5 +1,6 @@
 import requests
 import json
+import random
 
 ### API CALL for Token
 
@@ -8,6 +9,7 @@ auth_URL = "https://halo.calvin.edu/auth/token?tenant=calvinuni"
 asset_URL = base_URL + "/asset"
 CLIENT_ID, CLIENT_SECRET = "", ""
 ASSET_GROUP_ID = 103  # asset group id for classrooms
+DEBUG = True
 
 ### payload data
 data = {
@@ -42,6 +44,7 @@ def getToken():
     """
     response = requests.post(auth_URL, data=data)
     return response.json()["access_token"] if response.ok else ""
+
 
 def getClassDetails(token, id):
     try:
@@ -110,6 +113,9 @@ def getClassRoomsCondensed(token):
             modi_classes: dict
     """
 
+    if DEBUG:
+        random.seed(1234)
+
     ### map for Classroom Assets by their Building Code -- aka Final Result
     modi_classes = {
         "Arena Complex Classrooms": [],
@@ -155,9 +161,17 @@ def getClassRoomsCondensed(token):
                 # room capacity
                 # crestron availability
 
-                modi_classes[halo_building_name].append(
-                    [room_name, []]
-                )
+                if DEBUG:
+                    modi_classes[halo_building_name].append(
+                        [
+                            room_name,
+                            random.randint(10, 200),
+                        ]  # randint there for testing cap filter
+                    )
+                else:
+                    modi_classes[halo_building_name].append(
+                        [room_name, []]  # randint there for testing cap filter
+                    )
 
             if asset_count != 0:
                 return modi_classes
@@ -168,7 +182,9 @@ def getClassRoomsCondensed(token):
     except Exception as err:
         print(err, "Token is empty")
 
+
 ### TESTING JSON STRUCTURE
-# asset_test = getClassByID(getToken(), "4814")
-# with open("./test.json", "w+") as file:
-#     json.dump(asset_test, file)
+if DEBUG:
+    asset_test = getClassDetails(getToken(), "4814")
+    with open("./test.json", "w+") as file:
+        json.dump(asset_test, file)
