@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
-from helper import getToken, getClassRoomsCondensed
+from assets_helper import getToken, getClassRoomsCondensed
+from attachments_helper import getAttachmentsByHaloID, getAttachmentImage
 
 TOKEN = getToken()
 HEADERS = ["Room Name", "Room Capacity"]
