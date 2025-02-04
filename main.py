@@ -4,22 +4,31 @@ from assets_helper import getToken, getClassRoomsCondensed
 from attachments_helper import getAttachmentsByHaloID, getAttachmentImage
 
 TOKEN = getToken()
-HEADERS = ["Room Name", "Room Capacity"]
+HEADERS = ["Room Name", "Room ID", "Room Capacity"]
 
 st.header("Spaces Assets [Draft]")
 
 st.divider()
 
 table_col, details_col = st.columns(2)
+config = {"Room ID": st.column_config.NumberColumn("Room ID", format="%d")}
 
 
-def createClassExpander(room_name: str, room_cap: int, isCrestronAvailable: bool):
+def createClassExpander(room_name: str, room_id: int, room_cap: int, isCrestronAvailable: bool):
     """
     Creates an Expander for each space
     """
     a_expander = st.expander(room_name)
 
-    a_expander.image("./images/seminar.png", width=100)
+    image = ''
+    attachments = getAttachmentsByHaloID(TOKEN, room_id)
+
+    if attachments != None:
+        image = getAttachmentImage(TOKEN, attachments[0])
+    else:
+        image = "./images/seminar.png"
+
+    a_expander.image(image, width=100)
     a_expander.divider()
 
     col1, col2 = a_expander.columns(2)
@@ -76,17 +85,17 @@ with table_col:
         ]  # add room capacity filter
 
         st.dataframe(
-            class_df, use_container_width=True, hide_index=True
+            class_df, column_config=config, use_container_width=True, hide_index=True
         )  # display dataframe
     else:
         st.dataframe(pd.DataFrame())
 
 with details_col:
-    for room, capacity in zip(
-        class_df["Room Name"].tolist(), class_df["Room Capacity"].tolist()
+    for room, room_id, capacity in zip(
+        class_df["Room Name"].tolist(), class_df["Room ID"].tolist(), class_df["Room Capacity"].tolist()
     ):
         # apart from the room_name param, the rest are dummy values waiting for change in Halo
-        createClassExpander(room, capacity, True)
+        createClassExpander(room, room_id, capacity, True)
 
     # TODO: get classroom details
 

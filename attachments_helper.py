@@ -1,5 +1,4 @@
 import requests
-import json
 
 ### API CALL for Token
 
@@ -77,7 +76,7 @@ def getAttachmentImage(token, class_id):
             response = requests.get(url=attach_URL + query, headers=headers)
 
             attachments_resp = response.json()
-            print(attachments_resp["link"])
+            return(attachments_resp["link"])
 
         else:
             raise Exception
