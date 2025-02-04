@@ -11,7 +11,7 @@ auth_URL = "https://halo.calvin.edu/auth/token?tenant=calvinuni"
 asset_URL = base_URL + "/asset"
 CLIENT_ID, CLIENT_SECRET = st.secrets["CLIENT_ID"], st.secrets["CLIENT_SECRET"]
 ASSET_GROUP_ID = 103  # asset group id for classrooms
-DEBUG = True
+DEBUG = False
 
 ### payload data
 data = {
@@ -156,24 +156,19 @@ def getClassRoomsCondensed(token):
                 room_name = classroom["inventory_number"]
                 room_id = classroom["id"]
 
-                building_code = building_codes[halo_building_name]
-
                 # TODO: fields to add to halo classroom assets
                 # room assets
                 # room capacity
                 # crestron availability
 
-                if DEBUG:
-                    modi_classes[halo_building_name].append(
-                        [
-                            room_name,
-                            random.randint(10, 200),
-                        ]  # randint there for testing cap filter
-                    )
-                else:
-                    modi_classes[halo_building_name].append(
-                        [room_name, []]  # randint there for testing cap filter
-                    )
+
+                modi_classes[halo_building_name].append(
+                    [
+                        room_name,
+                        room_id,
+                        random.randint(10, 200),
+                    ]  # randint there for testing cap filter
+                )
 
             if asset_count != 0:
                 return modi_classes
