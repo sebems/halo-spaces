@@ -24,6 +24,7 @@ TOKEN = getToken()
 COL_HEADERS = ["Room Name", "Room ID", "Room Capacity"]
 
 
+@st.cache_data
 def createClassExpander(
     room_name: str, room_id: int, room_cap: int, isCrestronAvailable: bool
 ):
@@ -32,15 +33,15 @@ def createClassExpander(
     """
     a_expander = st.expander(room_name)
 
-    image = ""
     attachments = getAttachmentsByHaloID(TOKEN, room_id)
 
     if attachments != None:
-        image = getAttachmentImage(TOKEN, attachments[0])
+        # i = st.columns(len(attachments))
+        for link in attachments:
+            a_expander.image(getAttachmentImage(TOKEN, link), width=100)
     else:
-        image = "./images/seminar.png"
+        a_expander.image("./images/seminar.png", width=100)
 
-    a_expander.image(image, width=100)
     a_expander.divider()
 
     col1, col2 = a_expander.columns(2)
@@ -50,10 +51,6 @@ def createClassExpander(
     icon = "✅" if isCrestronAvailable else "❌"
 
     a_expander.info("Crestron Panel Available", icon=icon)
-
-
-def createImageContainer():
-    pass
 
 
 class_dict = getClassRoomsCondensed(TOKEN)
