@@ -1,4 +1,5 @@
 import requests
+import streamlit as st
 
 ### API CALL for Token
 
@@ -7,29 +8,10 @@ auth_URL = "https://halo.calvin.edu/auth/token?tenant=calvinuni"
 asset_URL = base_URL + "/asset"
 attach_URL = base_URL + "/attachment"
 
-CLIENT_ID, CLIENT_SECRET = "", ""
 DEBUG = True
 
-### payload data
-data = {
-    "client_id": CLIENT_ID,
-    "client_secret": CLIENT_SECRET,
-    "grant_type": "client_credentials",
-    "scope": "read:assets edit:assets",
-}
 
-
-def getToken():
-    """
-    Gets API Token for session. This has read and edit access to assets in Halo ITSM
-
-        @return:
-            token: str -- API Token
-    """
-    response = requests.post(auth_URL, data=data)
-    return response.json()["access_token"] if response.ok else ""
-
-
+@st.cache_data
 def getAttachmentsByHaloID(token, class_id):
     try:
         if len(token) > 0:  # check if the token is empty
@@ -59,6 +41,7 @@ def getAttachmentsByHaloID(token, class_id):
         print(err, "Token is empty")
 
 
+@st.cache_data
 def getAttachmentImage(token, class_id):
     try:
         if len(token) > 0:  # check if the token is empty
@@ -76,7 +59,7 @@ def getAttachmentImage(token, class_id):
             response = requests.get(url=attach_URL + query, headers=headers)
 
             attachments_resp = response.json()
-            return(attachments_resp["link"])
+            return attachments_resp["link"]
 
         else:
             raise Exception
