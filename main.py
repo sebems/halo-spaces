@@ -24,7 +24,7 @@ TOKEN = getToken()
 COL_HEADERS = ["Room Name", "Room ID", "Room Capacity"]
 
 
-@st.cache_data(allow_output_mutation=True)
+@st.cache_data(ttl = None)
 def createClassExpander(
     room_name: str, room_id: int, room_cap: int, isCrestronAvailable: bool
 ):
