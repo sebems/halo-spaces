@@ -68,11 +68,17 @@ def getClassDetails(token, id):
             response = requests.get(url=asset_URL + query, headers=headers)
 
             assets_resp = response.json()
-            return assets_resp if len(assets_resp) > 0 else []
+            result = assets_resp if len(assets_resp) > 0 else []
+            return result
         else:
             raise Exception
     except Exception as err:
         print(err, "Token is empty")
+
+
+def processClassDetails(details):
+    ### TODO: transform the data from getClassdetails to
+    pass
 
 
 @st.cache_data
@@ -153,12 +159,21 @@ def getClassRoomsCondensed(token):
             # GET API Call for Classroom Assets
             response = requests.get(url=asset_URL + query, headers=headers)
             asset_count = response.json()["record_count"]
+
             classroom_json = response.json()["assets"]
+
+            # classroom_json_ids = {
+            #     room["id"]: getClassDetails(token, room["id"])
+            #     for room in classroom_json
+            # }
 
             ### Fills modi_classes dictionary according to building_codes map above
             for classroom in classroom_json:
+                # print(classroom)
+                # break
                 halo_building_name = classroom["assettype_name"]
                 room_name = classroom["inventory_number"]
+                room_id = classroom["id"]
                 room_id = classroom["id"]
 
                 # TODO: fields to add to halo classroom assets
@@ -184,8 +199,9 @@ def getClassRoomsCondensed(token):
         print(err, "Token is empty")
 
 
-### TESTING JSON STRUCTURE
-if DEBUG:
-    asset_test = getClassDetails(getToken(), "4814")
-    with open("./test.json", "w+") as file:
-        json.dump(asset_test, file)
+if __name__ == "__main__":
+    ### TESTING JSON STRUCTURE
+    if DEBUG:
+        asset_test = getClassDetails(getToken(), "4731")
+        with open("./test.json", "w+") as file:
+            json.dump(asset_test, file)

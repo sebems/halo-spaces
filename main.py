@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-from assets_helper import getToken, getClassRoomsCondensed
+from assets_helper import getToken, getClassRoomsCondensed, getClassDetails
 from attachments_helper import getAttachmentsByHaloID, getAttachmentImage
 
 #######  PAGE CONFIG AND LOGO  #######
@@ -35,12 +35,13 @@ def createClassExpander(
 
     attachments = getAttachmentsByHaloID(TOKEN, room_id)
 
-    if attachments != None:
-        # i = st.columns(len(attachments))
-        for link in attachments:
-            a_expander.image(getAttachmentImage(TOKEN, link), width=100)
-    else:
-        a_expander.image("./images/seminar.png", width=100)
+    ### TODO: working on image caching
+    # if attachments != None:
+    #     # i = st.columns(len(attachments))
+    #     for link in attachments:
+    #         a_expander.image(getAttachmentImage(TOKEN, link), width=100)
+    # else:
+    a_expander.image("./images/seminar.png", width=100)
 
     a_expander.divider()
 
@@ -128,3 +129,7 @@ with details_col:
     # TODO: get classroom details
 
     # TODO: link classrooms to their respective assets
+
+test_btn = st.button("Test Details")
+if test_btn:
+    st.write(getClassDetails(TOKEN, "4731"))
