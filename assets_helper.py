@@ -125,17 +125,18 @@ def getClassRoomsCondensed(token):
 
     ### map for Classroom Assets by their Building Code -- aka Final Result
     modi_classes = {
-        "Arena Complex Classrooms": [],
-        "CFAC Classrooms": [],
-        "Chapel Classrooms": [],
-        "Commons Annex Classrooms": [],
-        "DeVos Classrooms": [],
-        "DeVries Hall Classrooms": [],
-        "Engineering Building Classrooms": [],
-        "Hiemenga Hall Classrooms": [],
+        "CFAC": [],
+        "Chapel": [],
+        "Commons Annex": [],
+        "DeVos": [],
+        "DeVries Hall": [],
+        "Engineering Building": [],
+        "Hekman Library": [],
+        "Hiemenga Hall": [],
+        "Hoogenboom Center": [],
         "North Hall Classrooms": [],
         "Science Building Classrooms": [],
-        "Spoelhof University Center Classrooms": [],
+        "Spoelhof University Center Classrooms": []
     }
 
     try:
@@ -174,6 +175,7 @@ def getClassRoomsCondensed(token):
                     ]  # randint there for testing cap filter
                 )
 
+
             if asset_count != 0:
                 return modi_classes
             else:
@@ -182,10 +184,3 @@ def getClassRoomsCondensed(token):
             raise Exception
     except Exception as err:
         print(err, "Token is empty")
-
-
-### TESTING JSON STRUCTURE
-if DEBUG:
-    asset_test = getClassDetails(getToken(), "4814")
-    with open("./test.json", "w+") as file:
-        json.dump(asset_test, file)
