@@ -24,7 +24,7 @@ TOKEN = getToken()
 COL_HEADERS = ["Room Name", "Room ID", "Room Capacity"]
 
 
-@st.cache_data
+@st.cache_data(ttl=None)
 def createClassExpander(
     room_name: str, room_id: int, room_cap: int, isCrestronAvailable: bool
 ):
@@ -35,7 +35,6 @@ def createClassExpander(
 
     attachments = getAttachmentsByHaloID(TOKEN, room_id)
 
-    ### TODO: working on image caching
     # if attachments != None:
     #     # i = st.columns(len(attachments))
     #     for link in attachments:
@@ -71,24 +70,26 @@ with sidebar:
     building_options = st.selectbox(
         "Filter Buildings",
         (
-            "Arena Complex",
             "CFAC",
             "Chapel",
             "Commons Annex",
             "DeVos",
             "DeVries Hall",
             "Engineering Building",
+            "Hekman Library",
             "Hiemenga Hall",
+            "Hoogenboom Center",
             "North Hall",
-            "Science Building",
-            "Spoelhof University Center",
+            "Science Building Classrooms",
+            "Spoelhof Center",
+            "Van Noord",
         ),
     )
 
 capacity_filter = sidebar.slider("Room Capacity", 10, 200, step=10)
 
 with table_col:
-    building_choice = f"{building_options}" + " Classrooms"
+    building_choice = f"{building_options}"
 
     if building_options != None and len(class_dict) > 0:
         building_rooms = class_dict[building_choice]  # gets the building choice
@@ -130,6 +131,27 @@ with details_col:
 
     # TODO: link classrooms to their respective assets
 
-test_btn = st.button("Test Details")
-if test_btn:
-    st.write(getClassDetails(TOKEN, "4731"))
+######################################################
+test_expander = st.expander("CF222")
+
+attachments = getAttachmentsByHaloID(TOKEN, 4731)
+
+# if attachments != None:
+#     # i = st.columns(len(attachments))
+#     for link in attachments:
+#         test_expander.image(getAttachmentImage(TOKEN, link), width=100)
+# else:
+test_expander.image("./images/seminar.png", width=100)
+
+test_expander.divider()
+
+col1, col2 = test_expander.columns(2)
+col1.markdown("CF222")
+col2.metric(label="Room Capacity", value=100)
+
+icon = "✅" if True else "❌"
+
+test_expander.info("Crestron Panel Available", icon=icon)
+
+if test_expander.button("View More Details"):
+    st.write(getClassDetails(TOKEN, 4731))
