@@ -50,8 +50,15 @@ def getToken():
     return response.json()["access_token"] if response.ok else ""
 
 
+def compressFieldsJson(jsonDetails):
+    res = {key: key["display"] for key in jsonDetails}
+    res["key_field"] = jsonDetails["key_field"]
+    return res
+
+
 @st.cache_data
 def getClassDetails(token, id):
+
     try:
         if len(token) > 0:  # check if the token is empty
 
@@ -68,49 +75,15 @@ def getClassDetails(token, id):
             response = requests.get(url=asset_URL + query, headers=headers)
 
             assets_resp = response.json()
-            result = assets_resp if len(assets_resp) > 0 else []
-            return result
-        else:
-            raise Exception
-    except Exception as err:
-        print(err, "Token is empty")
 
+            # fieldsOfConcern["key_field"] = assets_resp["key_field"]
 
-def processClassDetails(details):
-    ### TODO: transform the data from getClassdetails to
-    pass
-
-
-@st.cache_data
-def getClassrooms(token):
-    """
-    Gets the list of Classrooms from Halo in Dictionary variable
-
-        @returns:
-            classroom_json: dict
-    """
-
-    try:
-        if len(token) > 0:  # check if the token is empty
-
-            # Header Authentication
-            headers = {
-                "Authorization": f"Bearer {token}",
-                "Content-Type": "application/json",
-            }
-
-            # query to get all Classroom Assets from Halo
-            query = "?assetgroup_id={}".format(ASSET_GROUP_ID)
-
-            # GET API Call for Classroom Assets
-            response = requests.get(url=asset_URL + query, headers=headers)
-            asset_count = response.json()["record_count"]
-            classroom_json = response.json()["assets"]
-
-            if asset_count != 0:  # check so that we don't have to waste operation time
-                return classroom_json
-            else:
-                return "No Classrooms in the Database"
+            # return (
+            #     compressFieldsJson(assets_resp["fields"])
+            #     if len(assets_resp) > 0
+            #     else []
+            # )
+            return assets_resp["key_field"]
         else:
             raise Exception
     except Exception as err:
@@ -131,17 +104,19 @@ def getClassRoomsCondensed(token):
 
     ### map for Classroom Assets by their Building Code -- aka Final Result
     modi_classes = {
-        "Arena Complex Classrooms": [],
-        "CFAC Classrooms": [],
-        "Chapel Classrooms": [],
-        "Commons Annex Classrooms": [],
-        "DeVos Classrooms": [],
-        "DeVries Hall Classrooms": [],
-        "Engineering Building Classrooms": [],
-        "Hiemenga Hall Classrooms": [],
-        "North Hall Classrooms": [],
+        "CFAC": [],
+        "Chapel": [],
+        "Commons Annex": [],
+        "DeVos": [],
+        "DeVries Hall": [],
+        "Engineering Building": [],
+        "Hekman Library": [],
+        "Hiemenga Hall": [],
+        "Hoogenboom Center": [],
+        "North Hall": [],
         "Science Building Classrooms": [],
-        "Spoelhof University Center Classrooms": [],
+        "Spoelhof Center": [],
+        "Van Noord": [],
     }
 
     try:
@@ -159,21 +134,13 @@ def getClassRoomsCondensed(token):
             # GET API Call for Classroom Assets
             response = requests.get(url=asset_URL + query, headers=headers)
             asset_count = response.json()["record_count"]
-
             classroom_json = response.json()["assets"]
-
-            # classroom_json_ids = {
-            #     room["id"]: getClassDetails(token, room["id"])
-            #     for room in classroom_json
-            # }
 
             ### Fills modi_classes dictionary according to building_codes map above
             for classroom in classroom_json:
-                # print(classroom)
-                # break
+                # TODO: add check for empty or invalid field
                 halo_building_name = classroom["assettype_name"]
                 room_name = classroom["inventory_number"]
-                room_id = classroom["id"]
                 room_id = classroom["id"]
 
                 # TODO: fields to add to halo classroom assets
@@ -197,11 +164,3 @@ def getClassRoomsCondensed(token):
             raise Exception
     except Exception as err:
         print(err, "Token is empty")
-
-
-if __name__ == "__main__":
-    ### TESTING JSON STRUCTURE
-    if DEBUG:
-        asset_test = getClassDetails(getToken(), "4731")
-        with open("./test.json", "w+") as file:
-            json.dump(asset_test, file)
