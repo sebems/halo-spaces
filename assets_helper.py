@@ -12,7 +12,6 @@ asset_URL = base_URL + "/asset"
 CLIENT_ID, CLIENT_SECRET = st.secrets["CLIENT_ID"], st.secrets["CLIENT_SECRET"]
 
 ASSET_GROUP_ID = 103  # asset group id for classrooms
-DEBUG = False
 
 ### payload data
 data = {
@@ -49,14 +48,13 @@ def getToken():
     response = requests.post(auth_URL, data=data)
     return response.json()["access_token"] if response.ok else ""
 
-
+@st.cache_data(ttl=None)
 def compressFieldsJson(jsonDetails):
-    res = {key: key["display"] for key in jsonDetails}
-    res["key_field"] = jsonDetails["key_field"]
+    res = {key['id']: key["display"] for key in jsonDetails}
     return res
 
 
-@st.cache_data
+@st.cache_data(ttl=None)
 def getClassDetails(token, id):
 
     try:
@@ -75,15 +73,11 @@ def getClassDetails(token, id):
             response = requests.get(url=asset_URL + query, headers=headers)
 
             assets_resp = response.json()
+            jsonDetails = assets_resp['fields']
+            result = compressFieldsJson(jsonDetails)
+            result["key_field"] = assets_resp["key_field"]
 
-            # fieldsOfConcern["key_field"] = assets_resp["key_field"]
-
-            # return (
-            #     compressFieldsJson(assets_resp["fields"])
-            #     if len(assets_resp) > 0
-            #     else []
-            # )
-            return assets_resp["key_field"]
+            return result if len(assets_resp) > 0 else []
         else:
             raise Exception
     except Exception as err:
@@ -98,10 +92,6 @@ def getClassRoomsCondensed(token):
         @returns:
             modi_classes: dict
     """
-
-    if DEBUG:
-        random.seed(1234)
-
     ### map for Classroom Assets by their Building Code -- aka Final Result
     modi_classes = {
         "CFAC": [],
@@ -143,17 +133,12 @@ def getClassRoomsCondensed(token):
                 room_name = classroom["inventory_number"]
                 room_id = classroom["id"]
 
-                # TODO: fields to add to halo classroom assets
-                # room assets
-                # room capacity
-                # crestron availability
-
                 modi_classes[halo_building_name].append(
                     [
                         room_name,
                         room_id,
-                        random.randint(10, 200),
-                    ]  # randint there for testing cap filter
+                        []
+                    ]
                 )
 
             if asset_count != 0:
