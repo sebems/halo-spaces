@@ -48,9 +48,10 @@ def getToken():
     response = requests.post(auth_URL, data=data)
     return response.json()["access_token"] if response.ok else ""
 
+
 @st.cache_data(ttl=None)
 def compressFieldsJson(jsonDetails):
-    res = {key['id']: key["display"] for key in jsonDetails}
+    res = {key["id"]: key["display"] for key in jsonDetails}
     return res
 
 
@@ -73,9 +74,9 @@ def getClassDetails(token, id):
             response = requests.get(url=asset_URL + query, headers=headers)
 
             assets_resp = response.json()
-            jsonDetails = assets_resp['fields']
+            jsonDetails = assets_resp["fields"]
             result = compressFieldsJson(jsonDetails)
-            result["key_field"] = assets_resp["key_field"]
+            # result["key_field"] = assets_resp["key_field"]
 
             return result if len(assets_resp) > 0 else []
         else:
@@ -133,13 +134,7 @@ def getClassRoomsCondensed(token):
                 room_name = classroom["inventory_number"]
                 room_id = classroom["id"]
 
-                modi_classes[halo_building_name].append(
-                    [
-                        room_name,
-                        room_id,
-                        []
-                    ]
-                )
+                modi_classes[halo_building_name].append([room_name, room_id, []])
 
             if asset_count != 0:
                 return modi_classes

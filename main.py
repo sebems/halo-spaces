@@ -52,7 +52,9 @@ def createClassExpander(
 
     a_expander.info("Crestron Panel Available", icon=icon)
 
+
 def dummyEntry():
+    spaceDetails = getClassDetails(TOKEN, 4731)
     test_expander = st.expander("CF222")
 
     # attachments = getAttachmentsByHaloID(TOKEN, 4731)
@@ -67,15 +69,30 @@ def dummyEntry():
     test_expander.divider()
 
     col1, col2 = test_expander.columns(2)
-    col1.markdown("CF222")
-    col2.metric(label="Room Capacity", value=100)
+    classType = spaceDetails[182]
+    col1.metric(label="Classroom Type", value=classType)
+    roomCap = spaceDetails[180]
+    col2.metric(label="Seat Count", value=roomCap)
 
-    icon = "✅" if True else "❌"
+    isCrestronAvailable = True if spaceDetails[201] == "True" else False
+    isTeamsRoom = True if spaceDetails[204] == "True" else False
 
-    test_expander.info("Crestron Panel Available", icon=icon)
+    crestronIcon = "✅" if isCrestronAvailable else "❌"
+    teamsIcon = "✅" if isTeamsRoom else "❌"
 
-    with test_expander.popover("View More Details"):
-        test_expander.pills("Details", getClassDetails(TOKEN, 4731).values())
+    if isCrestronAvailable:
+        test_expander.success("Smart Room", icon=crestronIcon)
+    else:
+        test_expander.error("Smart Room", icon=crestronIcon)
+
+    if isTeamsRoom:
+        test_expander.success("Teams Room", icon=teamsIcon)
+    else:
+        test_expander.error("Teams Room", icon=teamsIcon)
+
+    st.write(spaceDetails)
+    # with test_expander.popover("View More Details"):
+    #     st.pills("Details", spaceDetails.values())
 
 
 class_dict = getClassRoomsCondensed(TOKEN)
