@@ -1,6 +1,13 @@
 import streamlit as st
 import pandas as pd
-from assets_helper import getToken, getClassRoomsCondensed, getClassDetails
+
+from assets_helper import (
+    getToken,
+    getClassRoomsCondensed,
+    getClassDetails,
+    BUILDING_NAMES,
+)
+
 from attachments_helper import getAttachmentsByHaloID, getAttachmentImage
 
 #######  PAGE CONFIG AND LOGO  #######
@@ -24,9 +31,9 @@ TOKEN = getToken()
 COL_HEADERS = ["Room Name", "Room ID", "Room Capacity"]
 
 
-@st.cache_data(ttl = None)
+@st.cache_data(ttl=None)
 def createClassExpander(
-    room_name: str, room_id: int, room_cap: int, isCrestronAvailable: bool
+    room_name: str, room_id: int, room_cap, isCrestronAvailable: bool
 ):
     """
     Creates an Expander for each space
@@ -35,22 +42,84 @@ def createClassExpander(
 
     attachments = getAttachmentsByHaloID(TOKEN, room_id)
 
-    if attachments != None:
-        # i = st.columns(len(attachments))
-        for link in attachments:
-            a_expander.image(getAttachmentImage(TOKEN, link), width=100)
-    else:
-        a_expander.image("./images/seminar.png", width=100)
+    # if attachments != None:
+    #     # i = st.columns(len(attachments))
+    #     for link in attachments:
+    #         a_expander.image(getAttachmentImage(TOKEN, link), width=100)
+    # else:
+    a_expander.image("./images/seminar.png", width=100)
 
     a_expander.divider()
 
     col1, col2 = a_expander.columns(2)
     col1.markdown(f"""#### {room_name}""")
-    col2.metric(label="Room Capacity", value=room_cap)
+    col2.metric(label="Room Capacity", value=0)
 
     icon = "✅" if isCrestronAvailable else "❌"
 
     a_expander.info("Crestron Panel Available", icon=icon)
+
+
+def dummyEntry():
+    spaceDetails = getClassDetails(TOKEN, 4731)
+    test_expander = st.expander("CF222")
+
+    # attachments = getAttachmentsByHaloID(TOKEN, 4731)
+
+    # if attachments != None:
+    #     # i = st.columns(len(attachments))
+    #     for link in attachments:
+    #         test_expander.image(getAttachmentImage(TOKEN, link), width=100)
+    # else:
+    test_expander.image("./images/seminar.png", width=100)
+
+    test_expander.divider()
+
+    col1, col2 = test_expander.columns(2)
+    classType = spaceDetails[182]
+    col1.metric(label="Classroom Type", value=classType)
+    roomCap = spaceDetails[180]
+    col2.metric(label="Seat Count", value=roomCap)
+
+    isCrestronAvailable = True if spaceDetails[201] == "True" else False
+    isTeamsRoom = True if spaceDetails[204] == "True" else False
+
+    crestronIcon = "✅" if isCrestronAvailable else "❌"
+    teamsIcon = "✅" if isTeamsRoom else "❌"
+
+    if isCrestronAvailable:
+        test_expander.success("Smart Room", icon=crestronIcon)
+    else:
+        test_expander.error("Smart Room", icon=crestronIcon)
+
+    if isTeamsRoom:
+        test_expander.success("Teams Room", icon=teamsIcon)
+    else:
+        test_expander.error("Teams Room", icon=teamsIcon)
+
+    with test_expander.popover("View More Details"):
+        col, col2 = st.columns([3, 1])
+
+        with col:
+            st.markdown(f"Board Type: **{spaceDetails[184]}**")
+            st.markdown(f"Camera Type: **{spaceDetails[181]}**")
+            st.markdown(f"Display Type: **{spaceDetails[200]}**")
+            st.markdown(f"Microphone Type: **{spaceDetails[198]}**")
+
+            st.markdown(f"Screen Type: **{spaceDetails[190]}**")
+            st.markdown(f"Computer: **{spaceDetails[196]}**")
+            st.markdown(f"Computer Lab: **{spaceDetails[195]}**")
+            st.markdown(f"Sound System: **{spaceDetails[202]}**")
+        with col2:
+            st.pills("Podium Type", spaceDetails[188].split(", "))
+            st.pills("Record Type", spaceDetails[195].split(", "))
+            st.pills("Inputs", spaceDetails[199].split(", "))
+            st.pills("Additional Room Specs", spaceDetails[203].split(", "))
+
+        # isEthernetAvailable = True if spaceDetails[201] == "True" else False
+        # st.checkbox("Display Type", {spaceDetails[200]}")
+
+    # st.write(spaceDetails)
 
 
 class_dict = getClassRoomsCondensed(TOKEN)
@@ -67,23 +136,8 @@ def fiz():
 with sidebar:
     search = st.text_input("Search")
     submit = st.button("Submit", on_click=fiz)
-    building_options = st.selectbox(
-        "Filter Buildings",
-        (
-        "CFAC",
-        "Chapel",
-        "Commons Annex",
-        "DeVos",
-        "DeVries Hall",
-        "Engineering Building",
-        "Hekman Library",
-        "Hiemenga Hall",
-        "Hoogenboom Center",
-        "North Hall Classrooms",
-        "Science Building Classrooms" ,
-        "Spoelhof University Center Classrooms"
+    building_options = st.selectbox("Filter Buildings", BUILDING_NAMES)
 
-    ))
 
 capacity_filter = sidebar.slider("Room Capacity", 10, 200, step=10)
 
@@ -102,9 +156,10 @@ with table_col:
         if search != "":
             class_df = class_df[class_df["Room Name"] == search]
 
-        class_df = class_df[
-            class_df["Room Capacity"] >= capacity_filter
-        ]  # add room capacity filter
+        # TODO:
+        # class_df = class_df[
+        #     class_df["Room Capacity"] >= capacity_filter
+        # ]  # add room capacity filter
 
         ## STREAMLIT DATAFRAME DISPLAY
         st.dataframe(
@@ -131,26 +186,4 @@ with details_col:
     # TODO: link classrooms to their respective assets
 
 ######################################################
-test_expander = st.expander("CF222")
-
-attachments = getAttachmentsByHaloID(TOKEN, 4731)
-
-if attachments != None:
-    # i = st.columns(len(attachments))
-    for link in attachments:
-        test_expander.image(getAttachmentImage(TOKEN, link), width=100)
-else:
-    test_expander.image("./images/seminar.png", width=100)
-
-test_expander.divider()
-
-col1, col2 = test_expander.columns(2)
-col1.markdown("CF222")
-col2.metric(label="Room Capacity", value=100)
-
-icon = "✅" if True else "❌"
-
-test_expander.info("Crestron Panel Available", icon=icon)
-
-if test_expander.button("View More Details"):
-    st.write(getClassDetails(TOKEN, 4731))
+dummyEntry()
