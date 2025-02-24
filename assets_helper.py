@@ -117,7 +117,7 @@ def getClassRoomsCondensed(token):
         "North Hall": [],
         "Science Building": [],
         "Spoelhof Center": [],
-        "Van Noord": [],
+        "Van Noord": []
     }
 
     try:
@@ -147,7 +147,6 @@ def getClassRoomsCondensed(token):
 
                 modi_classes[halo_building_name].append([room_name, room_id, []])
 
-            # print(modi_classes, len(modi_classes))
             if asset_count != 0:
                 return modi_classes
             else:

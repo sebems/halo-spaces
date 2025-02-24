@@ -11,7 +11,7 @@ attach_URL = base_URL + "/attachment"
 DEBUG = True
 
 
-@st.cache_data
+@st.cache_data(ttl = None)
 def getAttachmentsByHaloID(token, class_id):
     try:
         if len(token) > 0:  # check if the token is empty
@@ -41,7 +41,7 @@ def getAttachmentsByHaloID(token, class_id):
         print(err, "Token is empty")
 
 
-@st.cache_data
+@st.cache_data(ttl = None)
 def getAttachmentImage(token, class_id):
     try:
         if len(token) > 0:  # check if the token is empty

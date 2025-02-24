@@ -1,11 +1,13 @@
 import streamlit as st
 import pandas as pd
+
 from assets_helper import (
     getToken,
     getClassRoomsCondensed,
     getClassDetails,
     BUILDING_NAMES,
 )
+
 from attachments_helper import getAttachmentsByHaloID, getAttachmentImage
 
 #######  PAGE CONFIG AND LOGO  #######
@@ -136,6 +138,7 @@ with sidebar:
     submit = st.button("Submit", on_click=fiz)
     building_options = st.selectbox("Filter Buildings", BUILDING_NAMES)
 
+
 capacity_filter = sidebar.slider("Room Capacity", 10, 200, step=10)
 
 with table_col:
@@ -183,5 +186,4 @@ with details_col:
     # TODO: link classrooms to their respective assets
 
 ######################################################
-
 dummyEntry()
