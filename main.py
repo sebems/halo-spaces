@@ -1,6 +1,11 @@
 import streamlit as st
 import pandas as pd
-from assets_helper import getToken, getClassRoomsCondensed, getClassDetails
+from assets_helper import (
+    getToken,
+    getClassRoomsCondensed,
+    getClassDetails,
+    BUILDING_NAMES,
+)
 from attachments_helper import getAttachmentsByHaloID, getAttachmentImage
 
 #######  PAGE CONFIG AND LOGO  #######
@@ -90,9 +95,29 @@ def dummyEntry():
     else:
         test_expander.error("Teams Room", icon=teamsIcon)
 
-    st.write(spaceDetails)
-    # with test_expander.popover("View More Details"):
-    #     st.pills("Details", spaceDetails.values())
+    with test_expander.popover("View More Details"):
+        col, col2 = st.columns([3, 1])
+
+        with col:
+            st.markdown(f"Board Type: **{spaceDetails[184]}**")
+            st.markdown(f"Camera Type: **{spaceDetails[181]}**")
+            st.markdown(f"Display Type: **{spaceDetails[200]}**")
+            st.markdown(f"Microphone Type: **{spaceDetails[198]}**")
+
+            st.markdown(f"Screen Type: **{spaceDetails[190]}**")
+            st.markdown(f"Computer: **{spaceDetails[196]}**")
+            st.markdown(f"Computer Lab: **{spaceDetails[195]}**")
+            st.markdown(f"Sound System: **{spaceDetails[202]}**")
+        with col2:
+            st.pills("Podium Type", spaceDetails[188].split(", "))
+            st.pills("Record Type", spaceDetails[195].split(", "))
+            st.pills("Inputs", spaceDetails[199].split(", "))
+            st.pills("Additional Room Specs", spaceDetails[203].split(", "))
+
+        # isEthernetAvailable = True if spaceDetails[201] == "True" else False
+        # st.checkbox("Display Type", {spaceDetails[200]}")
+
+    # st.write(spaceDetails)
 
 
 class_dict = getClassRoomsCondensed(TOKEN)
@@ -109,24 +134,7 @@ def fiz():
 with sidebar:
     search = st.text_input("Search")
     submit = st.button("Submit", on_click=fiz)
-    building_options = st.selectbox(
-        "Filter Buildings",
-        (
-            "CFAC",
-            "Chapel",
-            "Commons Annex",
-            "DeVos",
-            "DeVries Hall",
-            "Engineering Building",
-            "Hekman Library",
-            "Hiemenga Hall",
-            "Hoogenboom Center",
-            "North Hall",
-            "Science Building Classrooms",
-            "Spoelhof Center",
-            "Van Noord",
-        ),
-    )
+    building_options = st.selectbox("Filter Buildings", BUILDING_NAMES)
 
 capacity_filter = sidebar.slider("Room Capacity", 10, 200, step=10)
 

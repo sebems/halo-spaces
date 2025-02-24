@@ -22,19 +22,25 @@ data = {
 }
 
 ### map for Calvin Building Codes (not the full list of what's on campus--just what is in Halo)
-building_codes = {
-    "Arena Complex Classrooms": "HC",
-    "CFAC Classrooms": "CF",
-    "Chapel Classrooms": "CP",
-    "Commons Annex Classrooms": "CA",
-    "DeVos Classrooms": "DC",
-    "DeVries Hall Classrooms": "DH",
-    "Engineering Building Classrooms": "EB",
-    "Hiemenga Hall Classrooms": "HH",
-    "North Hall Classrooms": "NH",
-    "Science Building Classrooms": "SB",
-    "Spoelhof University Center Classrooms": "SC",
-}
+BUILDING_NAMES = [
+    "Bunker Interpretive Center",
+    "CFAC",
+    "Chapel",
+    "Commons",
+    "Commons Annex",
+    "DeVos",
+    "DeVries Hall",
+    "Engineering Building",
+    "Hekman Library",
+    "Hiemenga Hall",
+    "Hoogenboom Center",
+    "Huizenga Track Center",
+    "Knollcrest",
+    "North Hall",
+    "Science Building",
+    "Spoelhof Center",
+    "Van Noord",
+]
 
 
 @st.cache_data  # caches the data to avoid long renders and reruns
@@ -95,8 +101,10 @@ def getClassRoomsCondensed(token):
     """
     ### map for Classroom Assets by their Building Code -- aka Final Result
     modi_classes = {
+        "Bunker Interpretive Center": [],
         "CFAC": [],
         "Chapel": [],
+        "Commons": [],
         "Commons Annex": [],
         "DeVos": [],
         "DeVries Hall": [],
@@ -104,8 +112,10 @@ def getClassRoomsCondensed(token):
         "Hekman Library": [],
         "Hiemenga Hall": [],
         "Hoogenboom Center": [],
+        "Huizenga Track Center": [],
+        "Knollcrest": [],
         "North Hall": [],
-        "Science Building Classrooms": [],
+        "Science Building": [],
         "Spoelhof Center": [],
         "Van Noord": [],
     }
@@ -127,6 +137,7 @@ def getClassRoomsCondensed(token):
             asset_count = response.json()["record_count"]
             classroom_json = response.json()["assets"]
 
+            # print(classroom_json)
             ### Fills modi_classes dictionary according to building_codes map above
             for classroom in classroom_json:
                 # TODO: add check for empty or invalid field
@@ -136,6 +147,7 @@ def getClassRoomsCondensed(token):
 
                 modi_classes[halo_building_name].append([room_name, room_id, []])
 
+            # print(modi_classes, len(modi_classes))
             if asset_count != 0:
                 return modi_classes
             else:
