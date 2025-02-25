@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import random, string
 
 from assets_helper import (
     getToken,
@@ -30,96 +31,79 @@ table_col, details_col = st.columns([1, 3])  # the details_col has more space al
 TOKEN = getToken()
 COL_HEADERS = ["Room Name", "Room ID", "Room Capacity"]
 
+def genRandKey():
 
-@st.cache_data(ttl=None)
-def createClassExpander(
-    room_name: str, room_id: int, room_cap, isCrestronAvailable: bool
-):
-    """
-    Creates an Expander for each space
-    """
-    a_expander = st.expander(room_name)
+    # https://stackoverflow.com/questions/367586/generating-random-text-strings-of-a-given-pattern
+    digits = ''.join(random.sample(string.digits, 8))
+    chars = ''.join(random.sample(string.ascii_letters, 15))
+    return f"{digits}_{chars}"
 
-    attachments = getAttachmentsByHaloID(TOKEN, room_id)
+def dummyEntry(room_name, room_id: int):
+    spaceDetails = getClassDetails(TOKEN, room_id)
 
-    # if attachments != None:
-    #     # i = st.columns(len(attachments))
-    #     for link in attachments:
-    #         a_expander.image(getAttachmentImage(TOKEN, link), width=100)
-    # else:
-    a_expander.image("./images/seminar.png", width=100)
+    if spaceDetails != None:
+        test_expander = st.expander(room_name)
 
-    a_expander.divider()
+        test_expander.image("./images/seminar.png", width=100)
 
-    col1, col2 = a_expander.columns(2)
-    col1.markdown(f"""#### {room_name}""")
-    col2.metric(label="Room Capacity", value=0)
+        test_expander.divider()
 
-    icon = "✅" if isCrestronAvailable else "❌"
+        col1, col2 = test_expander.columns(2)
 
-    a_expander.info("Crestron Panel Available", icon=icon)
+        classType = spaceDetails[182]
+        col1.metric(label="Classroom Type", value=classType)
+        roomCap = spaceDetails[180]
+        col2.metric(label="Seat Count", value=roomCap)
 
+        isCrestronAvailable = True if spaceDetails[201] == "True" else False
+        isTeamsRoom = True if spaceDetails[204] == "True" else False
 
-def dummyEntry():
-    spaceDetails = getClassDetails(TOKEN, 4731)
-    test_expander = st.expander("CF222")
+        crestronIcon = "✅" if isCrestronAvailable else "❌"
+        teamsIcon = "✅" if isTeamsRoom else "❌"
 
-    # attachments = getAttachmentsByHaloID(TOKEN, 4731)
+        if isCrestronAvailable:
+            test_expander.success("Smart Room", icon=crestronIcon)
+        else:
+            test_expander.error("Smart Room", icon=crestronIcon)
 
-    # if attachments != None:
-    #     # i = st.columns(len(attachments))
-    #     for link in attachments:
-    #         test_expander.image(getAttachmentImage(TOKEN, link), width=100)
-    # else:
-    test_expander.image("./images/seminar.png", width=100)
+        if isTeamsRoom:
+            test_expander.success("Teams Room", icon=teamsIcon)
+        else:
+            test_expander.error("Teams Room", icon=teamsIcon)
 
-    test_expander.divider()
+        with test_expander.popover("View More Details"):
+            col, col2 = st.columns([3, 1])
 
-    col1, col2 = test_expander.columns(2)
-    classType = spaceDetails[182]
-    col1.metric(label="Classroom Type", value=classType)
-    roomCap = spaceDetails[180]
-    col2.metric(label="Seat Count", value=roomCap)
+            with col:
+                st.markdown(f"Board Type: **{spaceDetails[184]}**")
+                st.markdown(f"Camera Type: **{spaceDetails[181]}**")
+                st.markdown(f"Display Type: **{spaceDetails[200]}**")
+                st.markdown(f"Microphone Type: **{spaceDetails[198]}**")
 
-    isCrestronAvailable = True if spaceDetails[201] == "True" else False
-    isTeamsRoom = True if spaceDetails[204] == "True" else False
+                st.markdown(f"Screen Type: **{spaceDetails[190]}**")
+                st.markdown(f"Computer: **{spaceDetails[196]}**")
+                st.markdown(f"Computer Lab: **{spaceDetails[195]}**")
+                st.markdown(f"Sound System: **{spaceDetails[202]}**")
+            with col2:
+                if spaceDetails[188] != "None":
+                    st.pills("Podium Type", spaceDetails[188].split(", "), key=genRandKey())
+                else:
+                    st.markdown(f"Podium Type: **{spaceDetails[188]}**")
 
-    crestronIcon = "✅" if isCrestronAvailable else "❌"
-    teamsIcon = "✅" if isTeamsRoom else "❌"
+                if spaceDetails[195] != "None":
+                    st.pills("Record Type", spaceDetails[195].split(", "), key=genRandKey())
+                else:
+                    st.markdown(f"Podium Type: **{spaceDetails[195]}**")
 
-    if isCrestronAvailable:
-        test_expander.success("Smart Room", icon=crestronIcon)
-    else:
-        test_expander.error("Smart Room", icon=crestronIcon)
+                if spaceDetails[199] != "None":
+                    st.pills("Inputs", spaceDetails[199].split(", "), key=genRandKey())
+                else:
+                    st.markdown(f"Inputs: **{spaceDetails[199]}**")
 
-    if isTeamsRoom:
-        test_expander.success("Teams Room", icon=teamsIcon)
-    else:
-        test_expander.error("Teams Room", icon=teamsIcon)
-
-    with test_expander.popover("View More Details"):
-        col, col2 = st.columns([3, 1])
-
-        with col:
-            st.markdown(f"Board Type: **{spaceDetails[184]}**")
-            st.markdown(f"Camera Type: **{spaceDetails[181]}**")
-            st.markdown(f"Display Type: **{spaceDetails[200]}**")
-            st.markdown(f"Microphone Type: **{spaceDetails[198]}**")
-
-            st.markdown(f"Screen Type: **{spaceDetails[190]}**")
-            st.markdown(f"Computer: **{spaceDetails[196]}**")
-            st.markdown(f"Computer Lab: **{spaceDetails[195]}**")
-            st.markdown(f"Sound System: **{spaceDetails[202]}**")
-        with col2:
-            st.pills("Podium Type", spaceDetails[188].split(", "))
-            st.pills("Record Type", spaceDetails[195].split(", "))
-            st.pills("Inputs", spaceDetails[199].split(", "))
-            st.pills("Additional Room Specs", spaceDetails[203].split(", "))
-
-        # isEthernetAvailable = True if spaceDetails[201] == "True" else False
-        # st.checkbox("Display Type", {spaceDetails[200]}")
-
-    # st.write(spaceDetails)
+                if spaceDetails[203] != "None":
+                    st.pills("Additional Room Specs", spaceDetails[203].split(", "), key=genRandKey())
+                else:
+                    st.markdown(f"Additional Room Specs: **{spaceDetails[203]}**")
 
 
 class_dict = getClassRoomsCondensed(TOKEN)
@@ -153,10 +137,10 @@ with table_col:
         # MAIN DATAFRAME OF SPACES ON CAMPUSs
         class_df = pd.DataFrame(building_rooms, columns=COL_HEADERS)
 
-        if search != "":
-            class_df = class_df[class_df["Room Name"] == search]
+        # if search != "":
+        #     class_df = class_df[class_df["Room Name"] == search]
 
-        # TODO:
+        # # TODO:
         # class_df = class_df[
         #     class_df["Room Capacity"] >= capacity_filter
         # ]  # add room capacity filter
@@ -173,17 +157,10 @@ with table_col:
         st.dataframe(pd.DataFrame(columns=COL_HEADERS))
 
 with details_col:
-    for room, room_id, capacity in zip(
+    # with st.spinner("Loading Classes", show_time=True):
+    for room, room_id in zip(
         class_df["Room Name"].tolist(),
-        class_df["Room ID"].tolist(),
-        class_df["Room Capacity"].tolist(),
+        class_df["Room ID"].tolist()
     ):
         # apart from the room_name param, the rest are dummy values waiting for change in Halo
-        createClassExpander(room, room_id, capacity, True)
-
-    # TODO: get classroom details
-
-    # TODO: link classrooms to their respective assets
-
-######################################################
-dummyEntry()
+        dummyEntry(room_name=room, room_id=room_id)

@@ -11,6 +11,7 @@ auth_URL = "https://halo.calvin.edu/auth/token?tenant=calvinuni"
 asset_URL = base_URL + "/asset"
 CLIENT_ID, CLIENT_SECRET = st.secrets["CLIENT_ID"], st.secrets["CLIENT_SECRET"]
 
+
 ASSET_GROUP_ID = 103  # asset group id for classrooms
 
 ### payload data
@@ -43,7 +44,7 @@ BUILDING_NAMES = [
 ]
 
 
-@st.cache_data  # caches the data to avoid long renders and reruns
+@st.cache_data(ttl=None)  # caches the data to avoid long renders and reruns
 def getToken():
     """
     Gets API Token for session. This has read and edit access to assets in Halo ITSM
@@ -57,7 +58,7 @@ def getToken():
 
 @st.cache_data(ttl=None)
 def compressFieldsJson(jsonDetails):
-    res = {key["id"]: key["display"] for key in jsonDetails}
+    res = {key["id"]: key["display"] if "display" in key else "None" for key in jsonDetails}
     return res
 
 
@@ -81,8 +82,8 @@ def getClassDetails(token, id):
 
             assets_resp = response.json()
             jsonDetails = assets_resp["fields"]
+
             result = compressFieldsJson(jsonDetails)
-            # result["key_field"] = assets_resp["key_field"]
 
             return result if len(assets_resp) > 0 else []
         else:
@@ -91,7 +92,7 @@ def getClassDetails(token, id):
         print(err, "Token is empty")
 
 
-@st.cache_data
+@st.cache_data(ttl=None)
 def getClassRoomsCondensed(token):
     """
     Gets the list of Classrooms Assets from Halo in a Codensed Dictionary variable
@@ -137,7 +138,6 @@ def getClassRoomsCondensed(token):
             asset_count = response.json()["record_count"]
             classroom_json = response.json()["assets"]
 
-            # print(classroom_json)
             ### Fills modi_classes dictionary according to building_codes map above
             for classroom in classroom_json:
                 # TODO: add check for empty or invalid field
@@ -145,7 +145,7 @@ def getClassRoomsCondensed(token):
                 room_name = classroom["inventory_number"]
                 room_id = classroom["id"]
 
-                modi_classes[halo_building_name].append([room_name, room_id, []])
+                modi_classes[halo_building_name].append([room_name, room_id])
 
             if asset_count != 0:
                 return modi_classes
