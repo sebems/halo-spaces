@@ -1,6 +1,4 @@
 import requests
-import json
-import random
 import streamlit as st
 
 
@@ -10,7 +8,6 @@ base_URL = "https://halo.calvin.edu/api"
 auth_URL = "https://halo.calvin.edu/auth/token?tenant=calvinuni"
 asset_URL = base_URL + "/asset"
 CLIENT_ID, CLIENT_SECRET = st.secrets["CLIENT_ID"], st.secrets["CLIENT_SECRET"]
-
 
 ASSET_GROUP_ID = 103  # asset group id for classrooms
 

@@ -9,8 +9,6 @@ from assets_helper import (
     BUILDING_NAMES,
 )
 
-from attachments_helper import getAttachmentsByHaloID, getAttachmentImage
-
 #######  PAGE CONFIG AND LOGO  #######
 st.set_page_config(
     page_title="Halo Spaces' Assets",
@@ -30,6 +28,8 @@ table_col, details_col = st.columns([1, 3])  # the details_col has more space al
 
 TOKEN = getToken()
 COL_HEADERS = ["Room Name", "Room ID"]
+CLASS_DICT = getClassRoomsCondensed(TOKEN)
+SIDEBAR = st.sidebar # SIDEBAR SECTION
 
 def genRandKey():
 
@@ -105,40 +105,22 @@ def dummyEntry(room_name, room_id: int):
                 else:
                     st.markdown(f"Additional Room Specs: **{spaceDetails[203]}**")
 
-
-class_dict = getClassRoomsCondensed(TOKEN)
-
-# SIDEBAR SECTION
-sidebar = st.sidebar
-
-
-## DUMMY FUNCTION FOR SEARCH BTN
-def fiz():
-    pass
-
-
-with sidebar:
-    search = st.text_input("Search")
-    submit = st.button("Submit", on_click=fiz)
+with SIDEBAR:
     building_options = st.selectbox("Filter Buildings", BUILDING_NAMES)
+    cap_filter = SIDEBAR.slider("Room Capacity", 10, 200, step=10)
 
-
-capacity_filter = sidebar.slider("Room Capacity", 10, 200, step=10)
 
 with table_col:
     building_choice = f"{building_options}"
 
-    if building_options != None and len(class_dict) > 0:
-        building_rooms = class_dict[building_choice]  # gets the building choice
+    if building_options != None and len(CLASS_DICT) > 0:
+        building_rooms = CLASS_DICT[building_choice]  # gets the building choice
 
         # DATAFRAME COLUMN CONFIGURATION
         config = {"Room ID": st.column_config.NumberColumn("Room ID", format="%d")}
 
         # MAIN DATAFRAME OF SPACES ON CAMPUSs
         class_df = pd.DataFrame(building_rooms, columns=COL_HEADERS)
-
-        # if search != "":
-        #     class_df = class_df[class_df["Room Name"] == search]
 
         # # TODO:
         # class_df = class_df[
