@@ -29,7 +29,7 @@ st.header("Spaces Assets [Draft]", divider="red")
 table_col, details_col = st.columns([1, 3])  # the details_col has more space allotted
 
 TOKEN = getToken()
-COL_HEADERS = ["Room Name", "Room ID", "Room Capacity"]
+COL_HEADERS = ["Room Name", "Room ID"]
 
 def genRandKey():
 
