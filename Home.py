@@ -1,13 +1,8 @@
 import streamlit as st
 import pandas as pd
 import random, string
-
-from assets_helper import (
-    getToken,
-    getClassRoomsCondensed,
-    getClassDetails,
-    BUILDING_NAMES,
-)
+from helpers.constant import *
+from helpers.assets_helper import getClassRoomsCondensed, getClassDetails
 
 #######  PAGE CONFIG AND LOGO  #######
 st.set_page_config(
@@ -18,99 +13,147 @@ st.set_page_config(
 )
 
 ## Main Logo
-st.logo(image="./images/calvin_banner_black.png")
+MAIN_LOGO = st.logo(image="./images/calvin_banner_black.png")
 
 ## Main Header with Divider
-st.header("Spaces Assets [Draft]", divider="red")
+MAIN_HEADER = st.header("Spaces Assets [Draft]", divider="red")
 
 ## PAGE COLUMNS
-table_col, details_col = st.columns([1, 3])  # the details_col has more space allotted
+TABLE_COL, DETAILS_COL = st.columns([1, 3])  # the details_col has more space allotted
 
-TOKEN = getToken()
 COL_HEADERS = ["Room Name", "Room ID"]
 CLASS_DICT = getClassRoomsCondensed(TOKEN)
-SIDEBAR = st.sidebar # SIDEBAR SECTION
+SIDEBAR = st.sidebar  # SIDEBAR SECTION
+
 
 def genRandKey():
+    """
+    Used to generate unique keys for components (this is to avoid a duplication error)
 
-    # https://stackoverflow.com/questions/367586/generating-random-text-strings-of-a-given-pattern
-    digits = ''.join(random.sample(string.digits, 8))
-    chars = ''.join(random.sample(string.ascii_letters, 15))
+    Source: https://stackoverflow.com/questions/367586/generating-random-text-strings-of-a-given-pattern
+    """
+    digits = "".join(random.sample(string.digits, 8))
+    chars = "".join(random.sample(string.ascii_letters, 15))
     return f"{digits}_{chars}"
 
+
 def dummyEntry(room_name, room_id: int):
+    """
+    Container Template for Room Details
+    """
     spaceDetails = getClassDetails(TOKEN, room_id)
 
     if spaceDetails != None:
         test_expander = st.expander(room_name)
-
         test_expander.image("./images/seminar.png", width=100)
 
         test_expander.divider()
 
         col1, col2 = test_expander.columns(2)
 
-        classType = spaceDetails[182]
+        classType = spaceDetails[CLASSROOM_TYPE]
         col1.metric(label="Classroom Type", value=classType)
-        roomCap = spaceDetails[180]
+
+        roomCap = spaceDetails[SEAT_COUNT]
         col2.metric(label="Seat Count", value=roomCap)
 
-        isCrestronAvailable = True if spaceDetails[201] == "True" else False
-        isTeamsRoom = True if spaceDetails[204] == "True" else False
+        isCrestronAvailable = True if spaceDetails[SMART_CLASSROOM] == "True" else False
+        isTeamsRoom = True if spaceDetails[TEAMS_ROOM] == "True" else False
+        isCamMicPresent = True if spaceDetails[CAMERA_MIC] == "True" else False
+        isEthernetPresent = True if spaceDetails[ETHERNET_JACKS] == "True" else False
 
         crestronIcon = "✅" if isCrestronAvailable else "❌"
         teamsIcon = "✅" if isTeamsRoom else "❌"
+        camMicIcon = "✅" if isCamMicPresent else "❌"
+        ethernetIcon = "✅" if isEthernetPresent else "❌"
 
+        ### IS CRESTRON AVAILABLE
         if isCrestronAvailable:
             test_expander.success("Smart Room", icon=crestronIcon)
         else:
             test_expander.error("Smart Room", icon=crestronIcon)
 
+        ### IS THIS A TEAMS ROOM
         if isTeamsRoom:
             test_expander.success("Teams Room", icon=teamsIcon)
         else:
             test_expander.error("Teams Room", icon=teamsIcon)
 
+        ### IS A CAMERA MIC AVAILABLE
+        if isCamMicPresent:
+            test_expander.success("Camera Mic Available", icon=camMicIcon)
+        else:
+            test_expander.error("Camera Mic Available", icon=camMicIcon)
+
+        ### IS ETHERNET AVAILABLE
+        if isEthernetPresent:
+            test_expander.success("Ethernet Available", icon=ethernetIcon)
+        else:
+            test_expander.error("Ethernet Available", icon=ethernetIcon)
+
+        ### DETAILS DROPDOWN
         with test_expander.popover("View More Details"):
-            col, col2 = st.columns([3, 1])
+            col, col2 = st.columns([3, 2])
 
             with col:
-                st.markdown(f"Board Type: **{spaceDetails[184]}**")
-                st.markdown(f"Camera Type: **{spaceDetails[181]}**")
-                st.markdown(f"Display Type: **{spaceDetails[200]}**")
-                st.markdown(f"Microphone Type: **{spaceDetails[198]}**")
+                st.markdown(f"Board Type: **{spaceDetails[BOARD_TYPE]}**")
+                st.markdown(f"Camera Type: **{spaceDetails[CAMERA_TYPE]}**")
+                st.markdown(f"Display Type: **{spaceDetails[DISPLAY_TYPE]}**")
+                st.markdown(f"Microphone Type: **{spaceDetails[MICROPHONE_TYPE]}**")
 
-                st.markdown(f"Screen Type: **{spaceDetails[190]}**")
-                st.markdown(f"Computer: **{spaceDetails[196]}**")
-                st.markdown(f"Computer Lab: **{spaceDetails[195]}**")
-                st.markdown(f"Sound System: **{spaceDetails[202]}**")
+                st.markdown(f"Screen Type: **{spaceDetails[SCREEN_TYPE]}**")
+                st.markdown(f"Computer: **{spaceDetails[COMPUTER]}**")
+                st.markdown(f"Computer Lab: **{spaceDetails[COMPUTER_LAB]}**")
+                st.markdown(f"Sound System: **{spaceDetails[SOUND_SYSTEM]}**")
+
             with col2:
-                if spaceDetails[188] != "None":
-                    st.pills("Podium Type", spaceDetails[188].split(", "), key=genRandKey())
+                ### PODIUM TYPE
+                if spaceDetails[PODIUM_TYPE] != "None":
+                    st.pills(
+                        "Podium Type",
+                        spaceDetails[PODIUM_TYPE].split(", "),
+                        key=genRandKey(),
+                    )
                 else:
-                    st.markdown(f"Podium Type: **{spaceDetails[188]}**")
+                    st.markdown(f"Podium Type: **{spaceDetails[PODIUM_TYPE]}**")
 
-                if spaceDetails[195] != "None":
-                    st.pills("Record Type", spaceDetails[195].split(", "), key=genRandKey())
+                ### RECORD TYPE
+                if spaceDetails[RECORD_TYPE] != "None":
+                    st.pills(
+                        "Record Type",
+                        spaceDetails[RECORD_TYPE].split(", "),
+                        key=genRandKey(),
+                    )
                 else:
-                    st.markdown(f"Podium Type: **{spaceDetails[195]}**")
+                    st.markdown(f"Record Type: **{spaceDetails[RECORD_TYPE]}**")
 
-                if spaceDetails[199] != "None":
-                    st.pills("Inputs", spaceDetails[199].split(", "), key=genRandKey())
+                ### INPUTS
+                if spaceDetails[INPUTS] != "None":
+                    st.pills(
+                        "Inputs", spaceDetails[INPUTS].split(", "), key=genRandKey()
+                    )
                 else:
-                    st.markdown(f"Inputs: **{spaceDetails[199]}**")
+                    st.markdown(f"Inputs: **{spaceDetails[INPUTS]}**")
 
-                if spaceDetails[203] != "None":
-                    st.pills("Additional Room Specs", spaceDetails[203].split(", "), key=genRandKey())
+                ### ADDITIONAL ROOM SPECS
+                if spaceDetails[ADDITIONAL_ROOM_SPECS] != "None":
+                    st.pills(
+                        "Additional Room Specs",
+                        spaceDetails[ADDITIONAL_ROOM_SPECS].split(", "),
+                        key=genRandKey(),
+                    )
                 else:
-                    st.markdown(f"Additional Room Specs: **{spaceDetails[203]}**")
+                    st.markdown(
+                        f"Additional Room Specs: **{spaceDetails[ADDITIONAL_ROOM_SPECS]}**"
+                    )
+
 
 with SIDEBAR:
     building_options = st.selectbox("Filter Buildings", BUILDING_NAMES)
     cap_filter = SIDEBAR.slider("Room Capacity", 10, 200, step=10)
 
 
-with table_col:
+with TABLE_COL:
     building_choice = f"{building_options}"
 
     if building_options != None and len(CLASS_DICT) > 0:
@@ -122,13 +165,8 @@ with table_col:
         # MAIN DATAFRAME OF SPACES ON CAMPUSs
         class_df = pd.DataFrame(building_rooms, columns=COL_HEADERS)
 
-        # # TODO:
-        # class_df = class_df[
-        #     class_df["Room Capacity"] >= capacity_filter
-        # ]  # add room capacity filter
-
         ## STREAMLIT DATAFRAME DISPLAY
-        st.dataframe(
+        MAIN_DATAFRAME = st.dataframe(
             class_df["Room Name"],  # show only the room names
             column_config=config,
             use_container_width=True,
@@ -136,13 +174,10 @@ with table_col:
         )
     else:
         ## DISPLAY AN EMPTY DATAFRAME IF THE API QUERY IS EMPTY
-        st.dataframe(pd.DataFrame(columns=COL_HEADERS))
+        MAIN_DATAFRAME = st.dataframe(pd.DataFrame(columns=COL_HEADERS))
 
-with details_col:
-    # with st.spinner("Loading Classes", show_time=True):
+with DETAILS_COL:
     for room, room_id in zip(
-        class_df["Room Name"].tolist(),
-        class_df["Room ID"].tolist()
+        class_df["Room Name"].tolist(), class_df["Room ID"].tolist()
     ):
-        # apart from the room_name param, the rest are dummy values waiting for change in Halo
         dummyEntry(room_name=room, room_id=room_id)

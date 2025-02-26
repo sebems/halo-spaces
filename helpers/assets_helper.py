@@ -1,7 +1,6 @@
 import requests
 import streamlit as st
 
-
 ### API CALL for Token
 
 base_URL = "https://halo.calvin.edu/api"
@@ -19,29 +18,8 @@ data = {
     "scope": "read:assets edit:assets",
 }
 
-### map for Calvin Building Codes (not the full list of what's on campus--just what is in Halo)
-BUILDING_NAMES = [
-    "Bunker Interpretive Center",
-    "CFAC",
-    "Chapel",
-    "Commons",
-    "Commons Annex",
-    "DeVos",
-    "DeVries Hall",
-    "Engineering Building",
-    "Hekman Library",
-    "Hiemenga Hall",
-    "Hoogenboom Center",
-    "Huizenga Track Center",
-    "Knollcrest",
-    "North Hall",
-    "Science Building",
-    "Spoelhof Center",
-    "Van Noord",
-]
 
-
-@st.cache_data(ttl=None)  # caches the data to avoid long renders and reruns
+@st.cache_data(ttl="12h")  # caches the data to avoid long renders and reruns
 def getToken():
     """
     Gets API Token for session. This has read and edit access to assets in Halo ITSM
@@ -53,13 +31,15 @@ def getToken():
     return response.json()["access_token"] if response.ok else ""
 
 
-@st.cache_data(ttl=None)
+@st.cache_data(ttl="12h")
 def compressFieldsJson(jsonDetails):
-    res = {key["id"]: key["display"] if "display" in key else "None" for key in jsonDetails}
+    res = {
+        key["id"]: key["display"] if "display" in key else "None" for key in jsonDetails
+    }
     return res
 
 
-@st.cache_data(ttl=None)
+@st.cache_data(ttl="12h")
 def getClassDetails(token, id):
 
     try:
@@ -89,7 +69,7 @@ def getClassDetails(token, id):
         print(err, "Token is empty")
 
 
-@st.cache_data(ttl=None)
+@st.cache_data(ttl="12h")
 def getClassRoomsCondensed(token):
     """
     Gets the list of Classrooms Assets from Halo in a Codensed Dictionary variable
@@ -115,7 +95,7 @@ def getClassRoomsCondensed(token):
         "North Hall": [],
         "Science Building": [],
         "Spoelhof Center": [],
-        "Van Noord": []
+        "Van Noord": [],
     }
 
     try:

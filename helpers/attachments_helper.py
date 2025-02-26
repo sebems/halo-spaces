@@ -8,10 +8,8 @@ auth_URL = "https://halo.calvin.edu/auth/token?tenant=calvinuni"
 asset_URL = base_URL + "/asset"
 attach_URL = base_URL + "/attachment"
 
-DEBUG = True
 
-
-@st.cache_data(ttl = None)
+@st.cache_data(ttl="12h")
 def getAttachmentsByHaloID(token, class_id):
     try:
         if len(token) > 0:  # check if the token is empty
@@ -41,7 +39,7 @@ def getAttachmentsByHaloID(token, class_id):
         print(err, "Token is empty")
 
 
-@st.cache_data(ttl = None)
+@st.cache_data(ttl="12h")
 def getAttachmentImage(token, class_id):
     try:
         if len(token) > 0:  # check if the token is empty
