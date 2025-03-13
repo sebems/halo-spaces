@@ -1,8 +1,39 @@
 import requests
 import streamlit as st
 import pandas as pd
-from constant import HEADER_COLS
+# from constant import HEADER_COLS
 
+HEADER_COLS = [
+    "CLASSROOM_TYPE",
+    "DISPLAY_TYPE",
+    "CPT",
+    "SEAT_COUNT",
+    "TEAMS_ROOM",
+    "LAST_REFRESH",
+    "LCR_PRICE",
+    "LCR_YEAR",
+    "CAMERA_TYPE",
+    "TIERED_SEATING",
+    "SMART_CLASSROOM",
+    "DESK_TYPE",  # 186
+    "TABLE_TYPE",  # 191
+    "BOARD_TYPE",
+    "PODIUM_TYPE",
+    "SCREEN_TYPE",
+    "RECORD_TYPE",
+    "COMPUTER_LAB",
+    "COMPUTER",
+    "CAMERA_MIC",
+    "MICROPHONE_TYPE",
+    "INPUTS",
+    "DISPLAY_TYPE",
+    "ETHERNET_JACK",
+    "SOUND_SYSTEM",
+    "ADDITIONAL_ROOM_SPECS",
+    "ROOM_ID",
+    "ROOM_NAME",
+    "BUILDING_NAME",
+]
 ### API CALL for Token
 
 base_URL = "https://halo.calvin.edu/api"
