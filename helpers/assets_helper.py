@@ -1,7 +1,7 @@
 import requests
 import streamlit as st
 import pandas as pd
-from helpers.constant import HEADER_COLS
+from constant import HEADER_COLS
 
 ### API CALL for Token
 
