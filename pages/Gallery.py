@@ -4,12 +4,12 @@ from helpers.assets_helper import getClassRoomsCondensed
 from helpers.attachments_helper import getAttachmentsByHaloID, getAttachmentImage
 from helpers.constant import TOKEN, BUILDING_NAMES
 
-st.set_page_config(
-    page_title="Gallery",
-    page_icon="./images/calvin.png",
-    layout="wide",
-    menu_items={"Get Help": "https://helpdesk.calvin.edu/portal/"},
-)
+# st.set_page_config(
+#     page_title="Gallery",
+#     page_icon="./images/calvin.png",
+#     layout="wide",
+#     menu_items={"Get Help": "https://helpdesk.calvin.edu/portal/"},
+# )
 
 ## Main Logo
 MAIN_LOGO = st.logo(image="./images/calvin_banner_black.png")

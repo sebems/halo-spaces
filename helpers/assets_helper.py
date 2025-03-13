@@ -1,5 +1,7 @@
 import requests
 import streamlit as st
+import pandas as pd
+from constant import HEADER_COLS
 
 ### API CALL for Token
 
@@ -31,15 +33,12 @@ def getToken():
     return response.json()["access_token"] if response.ok else ""
 
 
-@st.cache_data(ttl="12h")
 def compressFieldsJson(jsonDetails):
-    res = {
-        key["id"]: key["display"] if "display" in key else "None" for key in jsonDetails
-    }
+    res = [key["display"] if "display" in key else "None" for key in jsonDetails]
     return res
 
 
-@st.cache_data(ttl="12h")
+@st.cache_data
 def getClassDetails(token, id):
 
     try:
@@ -61,43 +60,19 @@ def getClassDetails(token, id):
             jsonDetails = assets_resp["fields"]
 
             result = compressFieldsJson(jsonDetails)
+            result.append(assets_resp["id"])
+            result.append(assets_resp["inventory_number"])
+            result.append(assets_resp["assettype_name"])
 
             return result if len(assets_resp) > 0 else []
         else:
             raise Exception
     except Exception as err:
-        print(err, "Token is empty")
+        print(err)
 
 
-@st.cache_data(ttl="12h")
-def getClassRoomsCondensed(token):
-    """
-    Gets the list of Classrooms Assets from Halo in a Codensed Dictionary variable
-
-        @returns:
-            modi_classes: dict
-    """
-    ### map for Classroom Assets by their Building Code -- aka Final Result
-    modi_classes = {
-        "Bunker Interpretive Center": [],
-        "CFAC": [],
-        "Chapel": [],
-        "Commons": [],
-        "Commons Annex": [],
-        "DeVos": [],
-        "DeVries Hall": [],
-        "Engineering Building": [],
-        "Hekman Library": [],
-        "Hiemenga Hall": [],
-        "Hoogenboom Center": [],
-        "Huizenga Track Center": [],
-        "Knollcrest": [],
-        "North Hall": [],
-        "Science Building": [],
-        "Spoelhof Center": [],
-        "Van Noord": [],
-    }
-
+@st.cache_resource
+def createSpacesDataframe(token):
     try:
         if len(token) > 0:  # check if the token is empty
 
@@ -108,27 +83,29 @@ def getClassRoomsCondensed(token):
             }
 
             # query to get all Classroom Assets from Halo
-            query = f"?assetgroup_id={ASSET_GROUP_ID}"
+            query = f"?assetgroup_id={ASSET_GROUP_ID}&idonly=True"
 
             # GET API Call for Classroom Assets
             response = requests.get(url=asset_URL + query, headers=headers)
-            asset_count = response.json()["record_count"]
-            classroom_json = response.json()["assets"]
+            space_assets = response.json()["assets"]
 
-            ### Fills modi_classes dictionary according to building_codes map above
-            for classroom in classroom_json:
-                # TODO: add check for empty or invalid field
-                halo_building_name = classroom["assettype_name"]
-                room_name = classroom["inventory_number"]
-                room_id = classroom["id"]
+            ### GET HALO SPACES BY ID ONLY
+            space_assets_ids = [space["id"] for space in space_assets]
 
-                modi_classes[halo_building_name].append([room_name, room_id])
+            ### GET HALO ROOM DETAILS
+            results = [
+                getClassDetails(token, space_id) for space_id in space_assets_ids
+            ]
 
-            if asset_count != 0:
-                return modi_classes
-            else:
-                return "No Classrooms in the Database"
+            ### RENDER INTO DATAFRAME
+            df = pd.DataFrame(
+                results,
+                columns=HEADER_COLS,
+            )
+
+            df.to_csv("./data/space_data.csv")
         else:
             raise Exception
-    except Exception as err:
-        print(err, "Token is empty")
+    except Exception as e:
+        print(e)
+        return []
