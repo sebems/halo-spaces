@@ -1,5 +1,4 @@
 from helpers.assets_helper import getToken
-import random, string
 
 SEAT_COUNT = 180
 CAMERA_TYPE = 181
@@ -54,4 +53,36 @@ BOARD_TYPES = [
     "Whiteboard - Large",
     "Whiteboard - Small",
     "None",
+]
+
+HEADER_COLS = [
+    "CLASSROOM_TYPE",
+    "DISPLAY_TYPE",
+    "CPT",
+    "SEAT_COUNT",
+    "TEAMS_ROOM",
+    "LAST_REFRESH",
+    "LCR_PRICE",
+    "LCR_YEAR",
+    "CAMERA_TYPE",
+    "TIERED_SEATING",
+    "SMART_CLASSROOM",
+    "DESK_TYPE",  # 186
+    "TABLE_TYPE",  # 191
+    "BOARD_TYPE",
+    "PODIUM_TYPE",
+    "SCREEN_TYPE",
+    "RECORD_TYPE",
+    "COMPUTER_LAB",
+    "COMPUTER",
+    "CAMERA_MIC",
+    "MICROPHONE_TYPE",
+    "INPUTS",
+    "DISPLAY_TYPE",
+    "ETHERNET_JACK",
+    "SOUND_SYSTEM",
+    "ADDITIONAL_ROOM_SPECS",
+    "ROOM_ID",
+    "ROOM_NAME",
+    "BUILDING_NAME",
 ]

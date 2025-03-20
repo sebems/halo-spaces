@@ -47,16 +47,8 @@ def create_sidebar_filters():
             "Filter Board Types", ["All"] + [bt for bt in BOARD_TYPES if bt != "All"]
         )
         capacity = st.slider("Room Capacity", 0, 200, step=20)
-        smart_room = st.checkbox("Smart Room Only", False)
-        teams_room = st.checkbox("Teams Room Only", False)
 
-    return {
-        "building": building,
-        "board_type": board_type,
-        "capacity": capacity,
-        "smart_room": smart_room,
-        "teams_room": teams_room,
-    }
+    return {"building": building, "board_type": board_type, "capacity": capacity}
 
 
 def filter_dataframe(df, filters):
@@ -76,7 +68,7 @@ def filter_dataframe(df, filters):
     # Select only the necessary columns for filtering and display
     filtered_df = df[
         [
-            "ROOM_NAME",
+            "Room Name",
             "BUILDING_NAME",
             "SEAT_COUNT",
             "BOARD_TYPE",
@@ -107,12 +99,8 @@ def filter_dataframe(df, filters):
         filtered_df = filtered_df[filtered_df["SEAT_COUNT"] >= filters["capacity"]]
     if filters["board_type"] != "All":
         filtered_df = filtered_df[filtered_df["BOARD_TYPE"] == filters["board_type"]]
-    if filters["smart_room"]:
-        filtered_df = filtered_df[filtered_df["SMART_CLASSROOM"] == True]
-    if filters["teams_room"]:
-        filtered_df = filtered_df[filtered_df["TEAMS_ROOM"] == True]
 
-    return filtered_df.sort_values(by=["ROOM_NAME"])
+    return filtered_df.sort_values(by=["Room Name"])
 
 
 def display_table(column, df):
@@ -125,12 +113,16 @@ def display_table(column, df):
     """
     with column:
         if not df.empty:
-            st.dataframe(df[["ROOM_NAME"]], hide_index=True, use_container_width=True)
+            st.dataframe(
+                df[["Room Name"]],
+                hide_index=True,
+                use_container_width=True,
+            )
         else:
             st.dataframe(pd.DataFrame(columns=["Room Name"]), use_container_width=True)
 
 
-def display_status(col, label, value):
+def display_status(label, value):
     """
     Displays a success or error message based on the given value.
 
@@ -141,9 +133,9 @@ def display_status(col, label, value):
     """
 
     if eval(str(value)):
-        col.success(label, icon="✅")
+        st.success(label, icon="✅")
     else:
-        col.error(label, icon="❌")
+        st.error(label, icon="❌")
 
 
 def display_room_details(dataframe_in):
@@ -154,12 +146,12 @@ def display_room_details(dataframe_in):
         dataframe_in (pandas.DataFrame): The DataFrame containing room details.
     """
     for _, row in dataframe_in.iterrows():
-        with st.expander(row["ROOM_NAME"]):
+        with st.expander(row["Room Name"]):
             col_left, col_right = st.columns([1, 3])
 
             with col_left:
                 st.image("./images/seminar.png", width=100)
-                with st.popover(f"{row['ROOM_NAME']} Details"):
+                with st.popover(f"{row['Room Name']} Details"):
                     if row["BOARD_TYPE"]:
                         st.pills(
                             "Board Type",
@@ -170,73 +162,18 @@ def display_room_details(dataframe_in):
                         st.markdown("Board Type: **None**")
 
                     st.markdown(
-                        f"Camera Type: **{row['CAMERA_TYPE'] if row['CAMERA_TYPE'] else 'None'}**"
-                    )
-                    st.markdown(
                         f"Display Type: **{row['DISPLAY_TYPE'] if row['DISPLAY_TYPE'] else 'None'}**"
                     )
                     st.markdown(
-                        f"Microphone Type: **{row['MICROPHONE_TYPE'] if row['MICROPHONE_TYPE'] else 'None'}**"
-                    )
-                    st.markdown(
-                        f"Screen Type: **{row['SCREEN_TYPE'] if row['SCREEN_TYPE'] else 'None'}**"
-                    )
-                    st.markdown(
-                        f"Computer: **{row['COMPUTER'] if row['COMPUTER'] else 'None'}**"
-                    )
-                    st.markdown(
                         f"Computer Lab: **{row['COMPUTER_LAB'] if row['COMPUTER_LAB'] else 'None'}**"
-                    )
-                    st.markdown(
-                        f"Sound System: **{row['SOUND_SYSTEM'] if row['SOUND_SYSTEM'] else 'None'}**"
                     )
 
             with col_right:
                 st.metric(label="Classroom Type", value=row["CLASSROOM_TYPE"])
                 st.metric(label="Seat Count", value=row["SEAT_COUNT"])
-
-                if row["PODIUM_TYPE"]:
-                    st.pills(
-                        "Podium Type",
-                        row["PODIUM_TYPE"].split(", "),
-                        key=f"podium_type_{row['ROOM_HASH']}",
-                    )
-                else:
-                    st.markdown("Podium Type: **None**")
-
-                if row["RECORD_TYPE"]:
-                    st.pills(
-                        "Record Type",
-                        row["RECORD_TYPE"].split(", "),
-                        key=f"record_type_{row['ROOM_HASH']}",
-                    )
-                else:
-                    st.markdown("Record Type: **None**")
-
-                if row["INPUTS"]:
-                    st.pills(
-                        "Inputs",
-                        row["INPUTS"].split(", "),
-                        key=f"inputs_{row['ROOM_HASH']}",
-                    )
-                else:
-                    st.markdown("Inputs: **None**")
-
-                if row["ADDITIONAL_ROOM_SPECS"]:
-                    st.pills(
-                        "Additional Room Specs",
-                        row["ADDITIONAL_ROOM_SPECS"].split(", "),
-                        key=f"room_specs_{row['ROOM_HASH']}",
-                    )
-                else:
-                    st.markdown("Additional Room Specs: **None**")
             st.divider()
 
-            status_cols = st.columns(4)
-            display_status(status_cols[0], "Smart Room", row["SMART_CLASSROOM"])
-            display_status(status_cols[1], "Teams Room", row["TEAMS_ROOM"])
-            display_status(status_cols[2], "Camera Mic Available", row["CAMERA_MIC"])
-            display_status(status_cols[3], "Ethernet Available", row["ETHERNET_JACK"])
+            display_status("Camera Mic Available", row["CAMERA_MIC"])
 
 
 def optimize_spaces_assets(dataframe_in):
@@ -263,6 +200,7 @@ def main():
             createSpacesDataframe(TOKEN)
 
     main_df = load_data()
+    main_df.rename(columns={"ROOM_NAME": "Room Name"}, inplace=True)
     optimize_spaces_assets(main_df)
 
 
