@@ -1,4 +1,4 @@
-from helpers.assets_helper import getToken
+ASSET_GROUP_ID = 103  # asset group id for classrooms
 
 SEAT_COUNT = 180
 CAMERA_TYPE = 181
@@ -22,29 +22,6 @@ SOUND_SYSTEM = 202
 ADDITIONAL_ROOM_SPECS = 203
 SMART_CLASSROOM = 204
 
-TOKEN = getToken()
-
-### map for Calvin Building Codes (not the full list of what's on campus--just what is in Halo)
-BUILDING_NAMES = [
-    "Bunker Interpretive Center",
-    "CFAC",
-    "Chapel",
-    "Commons",
-    "Commons Annex",
-    "DeVos",
-    "DeVries Hall",
-    "Engineering Building",
-    "Hekman Library",
-    "Hiemenga Hall",
-    "Hoogenboom Center",
-    "Huizenga Track Center",
-    "Knollcrest",
-    "North Hall",
-    "Science Building",
-    "Spoelhof Center",
-    "Van Noord",
-]
-
 BOARD_TYPES = [
     "Chalkboard - Small",
     "Chalkboard - Large",
@@ -56,19 +33,16 @@ BOARD_TYPES = [
 ]
 
 HEADER_COLS = [
-    "CLASSROOM_TYPE",
-    "DISPLAY_TYPE",
-    "CPT",
     "SEAT_COUNT",
+    "CLASSROOM_TYPE",
+    # "DISPLAY_TYPE",
+    # "CPT",
     "TEAMS_ROOM",
-    "LAST_REFRESH",
-    "LCR_PRICE",
-    "LCR_YEAR",
+    # "LAST_REFRESH",
+    # "LCR_PRICE",
+    # "LCR_YEAR",
     "CAMERA_TYPE",
-    "TIERED_SEATING",
-    "SMART_CLASSROOM",
-    "DESK_TYPE",  # 186
-    "TABLE_TYPE",  # 191
+    "TABLE_TYPE",
     "BOARD_TYPE",
     "PODIUM_TYPE",
     "SCREEN_TYPE",
@@ -85,4 +59,26 @@ HEADER_COLS = [
     "ROOM_ID",
     "ROOM_NAME",
     "BUILDING_NAME",
+]
+
+### map for Calvin Building Codes (not the full list of what's on campus--just what is in Halo)
+BUILDING_NAMES = [
+    "Bunker Interpretive Center",
+    "Business Building",
+    "CFAC",
+    "Chapel",
+    "Commons",
+    "Commons Annex",
+    "DeVos",
+    "DeVries Hall",
+    "Engineering Building",
+    "Hekman Library",
+    "Hiemenga Hall",
+    "Hoogenboom Center",
+    "Huizenga Track Center",
+    "Knollcrest",
+    "North Hall",
+    "Science Building",
+    "Spoelhof Center",
+    "Van Noord",
 ]

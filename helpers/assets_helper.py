@@ -1,16 +1,27 @@
 import requests
 import streamlit as st
 import pandas as pd
-from helpers.constant import *
 
-### API CALL for Token
+from helpers.constant import *
+import tomli
 
 base_URL = "https://halo.calvin.edu/api"
 auth_URL = "https://halo.calvin.edu/auth/token?tenant=calvinuni"
 asset_URL = base_URL + "/asset"
-CLIENT_ID, CLIENT_SECRET = st.secrets["CLIENT_ID"], st.secrets["CLIENT_SECRET"]
 
-ASSET_GROUP_ID = 103  # asset group id for classrooms
+DEBUG = True
+
+if DEBUG:
+    with open("helpers/secrets.toml", "rb") as fp:
+        config = tomli.load(fp)
+        CLIENT_ID, CLIENT_SECRET = (
+            config["secrets"]["CLIENT_ID"],
+            config["secrets"]["CLIENT_SECRET"],
+        )
+
+else:
+    CLIENT_ID, CLIENT_SECRET = st.secrets["CLIENT_ID"], st.secrets["CLIENT_SECRET"]
+
 
 ### payload data
 data = {
@@ -21,7 +32,6 @@ data = {
 }
 
 
-@st.cache_data(ttl="12h")  # caches the data to avoid long renders and reruns
 def getToken():
     """
     Gets API Token for session. This has read and edit access to assets in Halo ITSM
@@ -38,7 +48,6 @@ def compressFieldsJson(jsonDetails):
     return res
 
 
-@st.cache_data
 def getClassDetails(token, id):
 
     try:
@@ -71,7 +80,6 @@ def getClassDetails(token, id):
         print(err)
 
 
-@st.cache_resource
 def createSpacesDataframe(token):
     try:
         if len(token) > 0:  # check if the token is empty
@@ -103,9 +111,13 @@ def createSpacesDataframe(token):
                 columns=HEADER_COLS,
             )
 
+            # print(df[["BUILDING_NAME == 'Business Building'"]])
             df.to_csv("./data/space_data.csv")
         else:
             raise Exception
     except Exception as e:
         print(e)
         return []
+
+
+# createSpacesDataframe(TOKEN)

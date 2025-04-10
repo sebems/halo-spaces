@@ -2,8 +2,8 @@ import streamlit as st
 import pandas as pd
 from datetime import date
 import hashlib
-from helpers.constant import BUILDING_NAMES, BOARD_TYPES, TOKEN
-from helpers.assets_helper import createSpacesDataframe
+from helpers.constant import BUILDING_NAMES, BOARD_TYPES
+from helpers.assets_helper import createSpacesDataframe, getToken
 
 # Streamlit Page Configuration
 st.set_page_config(
@@ -23,6 +23,9 @@ def load_data():
         pandas.DataFrame: Processed DataFrame containing space data.
     """
     df = pd.read_csv("./data/space_data.csv", index_col=0).fillna(0)
+
+    df["ROOM_NAME"] = df["ROOM_NAME"].astype(str)
+
     # Convert 'SEAT_COUNT' to integer, handling non-numeric values
     df["SEAT_COUNT"] = (
         pd.to_numeric(df["SEAT_COUNT"], errors="coerce").fillna(0).astype(int)
@@ -42,7 +45,12 @@ def create_sidebar_filters():
         dict: Dictionary containing filter selections (building, board type, capacity, smart room, teams room).
     """
     with st.sidebar:
-        building = st.selectbox("Filter Buildings", BUILDING_NAMES)
+        building_def = 1  # Bunker Interpretive
+        building = st.selectbox(
+            "Filter Buildings",
+            ["All"] + [bt for bt in BUILDING_NAMES if bt != "All"],
+            index=building_def,
+        )
         board_type = st.selectbox(
             "Filter Board Types", ["All"] + [bt for bt in BOARD_TYPES if bt != "All"]
         )
@@ -69,31 +77,30 @@ def filter_dataframe(df, filters):
     filtered_df = df[
         [
             "Room Name",
-            "BUILDING_NAME",
             "SEAT_COUNT",
             "BOARD_TYPE",
-            "SMART_CLASSROOM",
-            "TEAMS_ROOM",
-            "CAMERA_MIC",
-            "ETHERNET_JACK",
-            "CLASSROOM_TYPE",
-            "CAMERA_TYPE",
-            "DISPLAY_TYPE",
-            "MICROPHONE_TYPE",
-            "SCREEN_TYPE",
-            "COMPUTER",
-            "COMPUTER_LAB",
-            "SOUND_SYSTEM",
-            "PODIUM_TYPE",
-            "RECORD_TYPE",
+            "SCREEN_SIZE",
             "INPUTS",
+            "TECH_TYPE",
+            "CLASSROOM_TYPE",
+            "COMPUTER_LAB",
+            "CPT",
+            "LAST_REFRESH",
+            "CAMERA_TYPE",
+            "PODIUM_TYPE",
+            "COMPUTER",
+            "CAMERA_MIC",
+            "DISPLAY_TYPE",
+            "DISLAY_COUNT",
+            "EQUIP_LOC",
             "ADDITIONAL_ROOM_SPECS",
+            "BUILDING_NAME",
             "ROOM_HASH",
         ]
     ].copy()
 
     # Apply filters
-    if filters["building"]:
+    if filters["building"] != "All":
         filtered_df = filtered_df[filtered_df["BUILDING_NAME"] == filters["building"]]
     if filters["capacity"] > 0:
         filtered_df = filtered_df[filtered_df["SEAT_COUNT"] >= filters["capacity"]]
@@ -162,7 +169,7 @@ def display_room_details(dataframe_in):
                         st.markdown("Board Type: **None**")
 
                     st.markdown(
-                        f"Display Type: **{row['DISPLAY_TYPE'] if row['DISPLAY_TYPE'] else 'None'}**"
+                        f"Tech Type: **{row['TECH_TYPE'] if row['TECH_TYPE'] else 'None'}**"
                     )
                     st.markdown(
                         f"Computer Lab: **{row['COMPUTER_LAB'] if row['COMPUTER_LAB'] else 'None'}**"
@@ -193,6 +200,8 @@ def optimize_spaces_assets(dataframe_in):
 
 
 def main():
+    TOKEN = getToken()
+
     weekday = date.today().strftime("%a")
 
     if weekday == "Sat":
@@ -201,6 +210,7 @@ def main():
 
     main_df = load_data()
     main_df.rename(columns={"ROOM_NAME": "Room Name"}, inplace=True)
+
     optimize_spaces_assets(main_df)
 
 

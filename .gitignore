@@ -1,3 +1,6 @@
 # Packaging
 venv/
 __pycache__/
+
+# TOML
+*.toml
