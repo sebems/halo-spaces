@@ -9,7 +9,7 @@ base_URL = "https://halo.calvin.edu/api"
 auth_URL = "https://halo.calvin.edu/auth/token?tenant=calvinuni"
 asset_URL = base_URL + "/asset"
 
-DEBUG = True
+DEBUG = False
 
 if DEBUG:
     with open("helpers/secrets.toml", "rb") as fp:
